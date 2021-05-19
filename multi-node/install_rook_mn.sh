@@ -75,6 +75,7 @@ function copy_images_to_minikube() {
       copy_image_to_cluster $DefaultAttacherImage
       copy_image_to_cluster $DefaultSnapshotterImage
       copy_image_to_cluster $DefaultResizerImage
+      copy_image_to_cluster $DefaultVolumeReplicationImage
 }
 
 function sed_changes() {

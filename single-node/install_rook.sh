@@ -6,12 +6,14 @@ echo "**** deleting existing images ****"
 docker image rm -f build-a69cca94/ceph-amd64:latest
 docker image rm -f quay.io/sp1098/rook:local
 
-DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.2.0"
+DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.3.1"
 DefaultRegistrarImage="k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1"
-DefaultProvisionerImage="k8s.gcr.io/sig-storage/csi-provisioner:v2.0.0"
-DefaultAttacherImage="k8s.gcr.io/sig-storage/csi-attacher:v3.0.0"
-DefaultSnapshotterImage="k8s.gcr.io/sig-storage/csi-snapshotter:v3.0.0"
-DefaultResizerImage="k8s.gcr.io/sig-storage/csi-resizer:v1.0.0"
+DefaultProvisionerImage="k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4"
+DefaultAttacherImage="k8s.gcr.io/sig-storage/csi-attacher:v3.0.2"
+DefaultSnapshotterImage="k8s.gcr.io/sig-storage/csi-snapshotter:v3.0.2"
+DefaultResizerImage="k8s.gcr.io/sig-storage/csi-resizer:v1.0.1"
+DefaultVolumeReplicationImage="quay.io/csiaddons/volumereplication-operator:v0.1.0"
+
 
 function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultCSIPluginImage} 2> /dev/null)" == "" ]]; then
@@ -37,6 +39,10 @@ function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultResizerImage} 2> /dev/null)" == "" ]]; then
           docker pull $DefaultResizerImage
     fi
+
+    if [[ "$(docker images -q ${DefaultVolumeReplicationImage} 2> /dev/null)" == "" ]]; then
+          docker pull $DefaultVolumeReplicationImage
+    fi
 }
 
 pull_dependent_images
@@ -61,6 +67,7 @@ function copy_images_to_minikube() {
       copy_image_to_cluster quay.io/sp1098/rook:local
 
       echo "**** copying ceph image to minikube cluster ****"
+      copy_image_to_cluster ceph/ceph:v15.2.11
       copy_image_to_cluster ceph/ceph:v15.2.9
 
       echo "**** copying ceph dependencies ****"
@@ -74,8 +81,8 @@ function copy_images_to_minikube() {
 
 function sed_changes() {
       echo "**** updating manifest files in ceph directory ****"
-       sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./cluster/examples/kubernetes/ceph/operator.yaml
-       sed -i "s/allowMultiplePerNode: false/allowMultiplePerNode: true/" ./cluster/examples/kubernetes/ceph/cluster.yaml
+      sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./cluster/examples/kubernetes/ceph/operator.yaml
+      sed -i "s/allowMultiplePerNode: false/allowMultiplePerNode: true/" ./cluster/examples/kubernetes/ceph/cluster.yaml
       if [ "$2" == "OSD_ON_DEVICE" ]; then
             echo "**** change rook image name ****"
            sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./cluster/examples/kubernetes/ceph/operator.yaml
