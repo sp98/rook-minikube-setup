@@ -6,6 +6,7 @@ echo "**** deleting existing images ****"
 docker image rm -f build-a69cca94/ceph-amd64:latest
 docker image rm -f quay.io/sp1098/rook:local
 
+CephImage="ceph/ceph:v16.2.4"
 DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.3.1"
 DefaultRegistrarImage="k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1"
 DefaultProvisionerImage="k8s.gcr.io/sig-storage/csi-provisioner:v2.0.4"
@@ -43,6 +44,10 @@ function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultVolumeReplicationImage} 2> /dev/null)" == "" ]]; then
           docker pull $DefaultVolumeReplicationImage
     fi
+
+    if [[ "$(docker images -q ${CephImage} 2> /dev/null)" == "" ]]; then
+          docker pull $CephImage
+    fi
 }
 
 pull_dependent_images
@@ -67,8 +72,7 @@ function copy_images_to_minikube() {
       copy_image_to_cluster quay.io/sp1098/rook:local
 
       echo "**** copying ceph image to minikube cluster ****"
-      copy_image_to_cluster ceph/ceph:v15.2.11
-      copy_image_to_cluster ceph/ceph:v15.2.9
+      copy_image_to_cluster $CephImage
 
       echo "**** copying ceph dependencies ****"
       copy_image_to_cluster $DefaultCSIPluginImage
