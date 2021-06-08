@@ -10,6 +10,7 @@
 # 6. Delete the common yaml
 
 echo "**** add clean up policy ****"
+#kubectl -n rook-ceph patch cephcluster rook-ceph --type merge -p '{"spec":{"cleanupPolicy":{"confirmation":"yes-really-destroy-data"}}}'
 kubectl get cephclusters.ceph.rook.io rook-ceph -n rook-ceph -o yaml | sed -z "s/cleanupPolicy:/&\n \ \ \ confirmation: yes-really-destroy-data/2" |  kubectl replace -f -
 
 sleep 5
