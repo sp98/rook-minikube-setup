@@ -13,6 +13,11 @@ lso_multi_node_setup:
 	@sh ./multi-node/create_mn_env.sh
 	@sh ./lso/setup.sh  NEW_BUILD
 
+lso_single_node_setup:
+	@echo "** Installing LSO on multiple node minikube setup**"
+	@sh ./single-node/create_env.sh
+	@sh ./lso/setup_single_node.sh  NEW_BUILD
+
 lso_multi_node_reinstall:
 	@echo "** Installing LSO on multiple node minikube setup**"
 	@sh ./lso/reinstall_lso.sh

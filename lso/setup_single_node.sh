@@ -15,17 +15,14 @@ function sed_changes() {
 function copy_image_to_cluster() {
     local build_image=$1
     local final_image=$2
-    docker save "${build_image}" |  minikube ssh -n m02  docker load
-    docker save "${build_image}" |  minikube ssh -n m03  docker load
-    docker save "${build_image}" |  minikube ssh -n m04  docker load
-    # docker save "${build_image}" | (eval "$(minikube docker-env --shell bash)" && docker load && docker tag "${build_image}" "${final_image}")
+    docker save "${build_image}" | (eval "$(minikube docker-env --shell bash)" && docker load && docker tag "${build_image}" "${final_image}")
 }
 
 function copy_images() {
       echo "copying lso images"
       copy_image_to_cluster quay.io/sp1098/lso quay.io/sp1098/lso
       copy_image_to_cluster quay.io/sp1098/local-diskmaker quay.io/sp1098/local-diskmaker
-      copy_image_to_cluster quay.io/openshift/origin-local-storage-static-provisioner quay.io/openshift/origin-local-storage-static-provisioner
+      #copy_image_to_cluster quay.io/openshift/origin-local-storage-static-provisioner quay.io/openshift/origin-local-storage-static-provisioner
 }
 
  sed_changes
@@ -59,7 +56,7 @@ copy_images
 # Start operator.yaml
 kubectl create -f ./config/rbac/
 kubectl create -f ./config/rbac/diskmaker/
-#kubectl create -f ./config/rbac/monitoring/
+kubectl create -f ./config/rbac/monitoring/
 kubectl create -f ./config/crd/bases/
 # kubectl create -f ./config/crd/bases/local.storage.openshift.io_localvolumes.yaml
 # kubectl create -f ./config/crd/bases/local.storage.openshift.io_localvolumesets.yaml
