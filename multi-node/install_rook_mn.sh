@@ -6,14 +6,16 @@ echo "**** deleting existing images ****"
 docker image rm -f build-a69cca94/ceph-amd64:latest
 docker image rm -f quay.io/sp1098/rook:local
 
-CephImage="ceph/ceph:v16.2.4"
-DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.3.1"
-DefaultRegistrarImage="k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1"
-DefaultProvisionerImage="k8s.gcr.io/sig-storage/csi-provisioner:v2.2.2"
-DefaultAttacherImage="k8s.gcr.io/sig-storage/csi-attacher:v3.2.1"
-DefaultSnapshotterImage="k8s.gcr.io/sig-storage/csi-snapshotter:v4.1.1"
-DefaultResizerImage="k8s.gcr.io/sig-storage/csi-resizer:v1.2.0"
-DefaultVolumeReplicationImage="quay.io/csiaddons/volumereplication-operator:v0.1.0"
+# CephImage="quay.io/ceph/ceph:v17.2.6"
+# CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
+CephImage="quay.io/guits/ceph-volume:bs-rdr"
+DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.9.0"
+DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.7.0"
+DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v3.4.0"
+DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.1.0"
+DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v6.2.1"
+DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.7.0"
+DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.5.0"
 
 function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultCSIPluginImage} 2> /dev/null)" == "" ]]; then
@@ -55,18 +57,20 @@ echo "**** Build new rook image ****"
 cd ~/go/src/github.com/rook/rook
 for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
 
-docker tag build-a69cca94/ceph-amd64:latest quay.io/sp1098/rook:local
+docker tag build-8df2d0f4/ceph-amd64:latest quay.io/sp1098/rook:local
 
 function copy_image_to_cluster(){
     local build_image=$1
-    docker save "${build_image}" |  minikube ssh -n m02  docker load
-    docker save "${build_image}" |  minikube ssh -n m03  docker load
-    docker save "${build_image}" |  minikube ssh -n m04  docker load
+#     docker save "${build_image}" |  minikube ssh -n m02  docker load
+#     docker save "${build_image}" |  minikube ssh -n m03  docker load
+#     docker save "${build_image}" |  minikube ssh -n m04  docker 
+    minikube image load "${build_image}"
 }
 
 function copy_images_to_minikube() {
       echo "**** copying rook image to minikube cluster ****"
       copy_image_to_cluster quay.io/sp1098/rook:local
+      # copy_image_to_cluster rook/ceph:master
 
       echo "**** copying ceph image to minikube cluster ****"
       copy_image_to_cluster $CephImage
@@ -85,15 +89,17 @@ function sed_changes() {
       echo "**** updating manifest files in ceph directory ****"
 
       echo "**** change rook image name ****"
-      sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./cluster/examples/kubernetes/ceph/operator.yaml
-      sed -i "s/managePodBudgets: false/managePodBudgets: true/" ./cluster/examples/kubernetes/ceph/cluster.yaml
+      sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./operator.yaml
 
       if [ "$2" == "OSD_ON_PVC" ]; then
            echo "**** change storage class name ****"
-           sed -i "s/storageClassName: gp2/storageClassName: foobar/" ./cluster/examples/kubernetes/ceph/cluster-on-pvc.yaml
+           sed -i "s/storageClassName: gp2/storageClassName: manual/" ./cluster-on-pvc.yaml
       fi
 }
 
+
+echo "**** Deploying Rook Cluster ****"
+cd ~/go/src/github.com/rook/rook/deploy/examples
 
 # update rook ceph manifest files to use local builds etc.
 sed_changes "$2"
@@ -102,9 +108,6 @@ sed_changes "$2"
 
 copy_images_to_minikube
 
-
-echo "**** Deploying Rook Cluster ****"
-cd ~/go/src/github.com/rook/rook/cluster/examples/kubernetes/ceph
 
 echo "**** Apply common ****"
 kubectl create -f common.yaml
@@ -130,7 +133,8 @@ fi
 
 if [ "$1" == "OSD_ON_PVC" ]; then
 echo "**** Creating ceph Cluster with OSD on PVC ****"
-kubectl create -f cluster-on-pvc.yaml
+cd /home/sapillai/scripts/rook-minikube-setup/multi-node
+kubectl create -f cluster-on-local-pvc.yaml
 fi
 
 echo "*** Successfully install Rook (OSD on devices) on Minikube Cluster ****"

@@ -1,0 +1,74 @@
+hashicorp on minikube:
+
+
+1. Setup vault on minikube using helm:
+
+helm repo add hashicorp https://helm.releases.hashicorp.com
+
+helm repo update
+
+helm search repo hashicorp/vault
+
+cat > helm-vault-raft-values.yml <<EOF
+server:
+  affinity: ""
+  ha:
+    enabled: true
+    raft: 
+      enabled: true
+EOF
+
+
+helm install vault hashicorp/vault --values helm-vault-raft-values.yml
+
+
+2. Ensure all pods are running:
+watch kubectl get pods
+
+
+3. 
+
+kubectl exec vault-0 -- vault operator init \
+    -key-shares=1 \
+    -key-threshold=1 \
+    -format=json > cluster-keys.json
+
+jq -r ".unseal_keys_b64[]" cluster-keys.json
+
+VAULT_UNSEAL_KEY=$(jq -r ".unseal_keys_b64[]" cluster-keys.json)
+
+kubectl exec vault-0 -- vault operator unseal $VAULT_UNSEAL_KEY
+
+kubectl exec -ti vault-1 -- vault operator raft join http://vault-0.vault-internal:8200
+kubectl exec -ti vault-2 -- vault operator raft join http://vault-0.vault-internal:8200
+
+
+kubectl exec -ti vault-1 -- vault operator unseal $VAULT_UNSEAL_KEY
+kubectl exec -ti vault-2 -- vault operator unseal $VAULT_UNSEAL_KEY
+
+
+
+4. Setting a secret in value:
+jq -r ".root_token" cluster-keys.json
+
+kubectl exec --stdin=true --tty=true vault-0 -- /bin/sh
+
+vault login  <root token>
+
+add below to /temp/rook.hcl
+path "rook/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+path "sys/mounts" {
+capabilities = ["read"]
+}
+
+
+vault policy write rook /tmp/rook.hcl
+vault token create -policy=rook
+- Use the token created in this step as base64 decode in secert
+vault secrets enable -path=rook kv
+
+
+5. Config CephCluster
+

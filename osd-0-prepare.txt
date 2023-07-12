@@ -1,0 +1,127 @@
+2023-08-23 05:25:42.626770 I | cephcmd: desired devices to configure osds: [{Name:/mnt/set1-data-0vt9cg OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2023-08-23 05:25:42.627449 I | rookcmd: starting Rook v1.12.0-alpha.0.160.g1d2d5fdc8-dirty with arguments '/rook/rook ceph osd provision'
+2023-08-23 05:25:42.627462 I | rookcmd: flag values: --cluster-id=ba19c8c7-9a22-4614-90cf-917feb327559, --cluster-name=rook-ceph, --data-device-filter=, --data-device-path-filter=, --data-devices=[{"id":"/mnt/set1-data-0vt9cg","storeConfig":{"osdsPerDevice":1}}], --encrypted-device=true, --force-format=false, --help=false, --location=, --log-level=DEBUG, --metadata-device=, --node-name=set1-data-0vt9cg, --osd-crush-device-class=, --osd-crush-initial-weight=, --osd-database-size=0, --osd-store-type=bluestore-rdr, --osd-wal-size=576, --osds-per-device=1, --pvc-backed-osd=true, --replace-osd=0
+2023-08-23 05:25:42.627466 I | ceph-spec: parsing mon endpoints: a=10.102.2.9:6789,b=10.109.54.24:6789,c=10.99.21.204:6789
+2023-08-23 05:25:42.636599 I | op-osd: CRUSH location=root=default host=minikube-m02
+2023-08-23 05:25:42.636621 I | cephcmd: crush location of osd: root=default host=minikube-m02
+2023-08-23 05:25:42.636962 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list  --format json
+2023-08-23 05:25:43.293336 D | cephosd: {}
+2023-08-23 05:25:43.293379 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2023-08-23 05:25:43.293407 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list --format json
+2023-08-23 05:25:43.925240 D | cephosd: {
+    "9e8b7877-6913-41a3-8a82-6451d5cf8f54": {
+        "ceph_fsid": "af304b88-19ef-44f0-8e16-29c56c9a542a",
+        "device": "/dev/mapper/set1-data-0vt9cg-block-dmcrypt",
+        "osd_id": 0,
+        "osd_uuid": "9e8b7877-6913-41a3-8a82-6451d5cf8f54",
+        "type": "bluestore"
+    }
+}
+2023-08-23 05:25:43.925450 D | exec: Running command: cryptsetup luksDump /mnt/set1-data-0vt9cg
+2023-08-23 05:25:43.934608 I | cephosd: 1 ceph-volume raw osd devices configured on this node
+2023-08-23 05:25:43.934633 I | cephcmd: destroying OSD 0
+2023-08-23 05:25:43.934652 D | exec: Running command: ceph osd destroy osd.0 --yes-i-really-mean-it --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2023-08-23 05:26:03.286649 I | cephcmd: successfully destroyed osd.0
+2023-08-23 05:26:03.286679 D | exec: Running command: dmsetup remove --force set1-data-0vt9cg-block-dmcrypt
+2023-08-23 05:26:03.296169 D | cephosd: successfully removed stale dm device "set1-data-0vt9cg-block-dmcrypt"
+2023-08-23 05:26:03.296205 D | exec: Running command: lsblk /mnt/set1-data-0vt9cg --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2023-08-23 05:26:03.300338 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"crypto_LUKS\""
+2023-08-23 05:26:03.300527 D | exec: Running command: sgdisk --print /mnt/set1-data-0vt9cg
+2023-08-23 05:26:03.307038 I | cephcmd: zap OSD.0 path "/dev/vdc"
+2023-08-23 05:26:03.307070 D | exec: Running command: stdbuf -oL ceph-volume lvm zap /dev/vdc --destroy
+2023-08-23 05:26:03.891754 I | cephcmd: --> Zapping: /dev/vdc
+Running command: /usr/bin/dd if=/dev/zero of=/dev/vdc bs=1M count=10 conv=fsync
+ stderr: 10+0 records in
+10+0 records out
+10485760 bytes (10 MB, 10 MiB) copied, 0.0257542 s, 407 MB/s
+--> Zapping successful for: <Raw Device: /dev/vdc>
+2023-08-23 05:26:03.891777 I | cephcmd: successfully zaped osd.0 path "/dev/vdc"
+2023-08-23 05:26:03.891783 D | cephosd: encryption configuration detecting, populating kek to an env variable
+2023-08-23 05:26:03.891809 D | cephosd: cluster-wide encryption is enabled with kubernetes secrets and the kek is attached to the provision env spec
+2023-08-23 05:26:03.891816 D | exec: Running command: dmsetup version
+2023-08-23 05:26:03.897853 I | cephosd: Library version:   1.02.181-RHEL8 (2021-10-20)
+Driver version:    4.43.0
+2023-08-23 05:26:03.909729 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2023-08-23 05:26:03.909769 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2023-08-23 05:26:03.909825 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2023-08-23 05:26:03.909934 D | cephclient: config file @ /etc/ceph/ceph.conf:
+[global]
+fsid                = af304b88-19ef-44f0-8e16-29c56c9a542a
+mon initial members = a b c
+mon host            = [v2:10.102.2.9:3300,v1:10.102.2.9:6789],[v2:10.109.54.24:3300,v1:10.109.54.24:6789],[v2:10.99.21.204:3300,v1:10.99.21.204:6789]
+
+[client.admin]
+keyring = /var/lib/rook/rook-ceph/client.admin.keyring
+2023-08-23 05:26:03.909943 I | cephosd: discovering hardware
+2023-08-23 05:26:03.909950 D | exec: Running command: lsblk /mnt/set1-data-0vt9cg --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2023-08-23 05:26:03.913234 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2023-08-23 05:26:03.913289 D | exec: Running command: sgdisk --print /mnt/set1-data-0vt9cg
+2023-08-23 05:26:03.918054 D | exec: Running command: udevadm info --query=property /dev/vdc
+2023-08-23 05:26:03.926694 D | sys: udevadm info output: "DEVLINKS=/dev/disk/by-path/pci-0000:00:07.0 /dev/disk/by-path/virtio-pci-0000:00:07.0\nDEVNAME=/dev/vdc\nDEVPATH=/devices/pci0000:00/0000:00:07.0/virtio4/block/vdc\nDEVTYPE=disk\nID_PATH=pci-0000:00:07.0\nID_PATH_TAG=pci-0000_00_07_0\nMAJOR=253\nMINOR=32\nSUBSYSTEM=block\nTAGS=:systemd:\nUSEC_INITIALIZED=4379469"
+2023-08-23 05:26:03.926730 I | cephosd: creating and starting the osds
+2023-08-23 05:26:03.926782 D | cephosd: desiredDevices are [{Name:/mnt/set1-data-0vt9cg OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2023-08-23 05:26:03.926789 D | cephosd: context.Devices are:
+2023-08-23 05:26:03.926812 D | cephosd: &{Name:/mnt/set1-data-0vt9cg Parent: HasChildren:false DevLinks:/dev/disk/by-path/pci-0000:00:07.0 /dev/disk/by-path/virtio-pci-0000:00:07.0 Size:10737418240 UUID:75d45439-57d2-4dc4-9629-828df77b4043 Serial: Type:data Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vdc KernelName:vdc Encrypted:false}
+2023-08-23 05:26:03.926819 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2023-08-23 05:26:03.926860 D | exec: Running command: cryptsetup luksDump /mnt/set1-data-0vt9cg
+2023-08-23 05:26:03.937879 E | cephosd: failed to determine if the encrypted block "/mnt/set1-data-0vt9cg" is from our cluster. failed to dump LUKS header for disk "/mnt/set1-data-0vt9cg". Device /mnt/set1-data-0vt9cg is not a valid LUKS device.: exit status 1
+2023-08-23 05:26:03.937923 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list /mnt/set1-data-0vt9cg --format json
+2023-08-23 05:26:04.433702 D | cephosd: {}
+2023-08-23 05:26:04.433732 I | cephosd: 0 ceph-volume raw osd devices configured on this node
+2023-08-23 05:26:04.433781 I | cephosd: device "/mnt/set1-data-0vt9cg" is available.
+2023-08-23 05:26:04.434962 I | cephosd: "/mnt/set1-data-0vt9cg" found in the desired devices
+2023-08-23 05:26:04.435026 I | cephosd: device "/mnt/set1-data-0vt9cg" is selected by the device filter/name "/mnt/set1-data-0vt9cg"
+2023-08-23 05:26:04.444546 I | cephosd: configuring osd devices: {"Entries":{"data":{"Data":-1,"Metadata":null,"Config":{"Name":"/mnt/set1-data-0vt9cg","OSDsPerDevice":1,"MetadataDevice":"","DatabaseSizeMB":0,"DeviceClass":"hdd","InitialWeight":"","IsFilter":false,"IsDevicePathFilter":false},"PersistentDevicePaths":["/dev/disk/by-path/pci-0000:00:07.0","/dev/disk/by-path/virtio-pci-0000:00:07.0"],"DeviceInfo":{"name":"/mnt/set1-data-0vt9cg","parent":"","hasChildren":false,"devLinks":"/dev/disk/by-path/pci-0000:00:07.0 /dev/disk/by-path/virtio-pci-0000:00:07.0","size":10737418240,"uuid":"75d45439-57d2-4dc4-9629-828df77b4043","serial":"","type":"data","rotational":true,"readOnly":false,"Partitions":null,"filesystem":"","mountpoint":"","vendor":"","model":"","wwn":"","wwnVendorExtension":"","empty":false,"real-path":"/dev/vdc","kernel-name":"vdc"},"RestoreOSD":false}}}
+2023-08-23 05:26:04.444651 I | cephclient: getting or creating ceph auth key "client.bootstrap-osd"
+2023-08-23 05:26:04.444680 D | exec: Running command: ceph auth get-or-create-key client.bootstrap-osd mon allow profile bootstrap-osd --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2023-08-23 05:26:05.387173 D | exec: Running command: lsblk /mnt/set1-data-0vt9cg --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2023-08-23 05:26:05.394424 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2023-08-23 05:26:05.394599 I | cephosd: configuring new device "/mnt/set1-data-0vt9cg"
+2023-08-23 05:26:05.394647 D | exec: Running command: stdbuf -oL ceph-volume --log-path /var/log/ceph/set1-data-0vt9cg raw prepare --bluestore-rdr --data /mnt/set1-data-0vt9cg --osd-id 0 --dmcrypt
+2023-08-23 05:26:25.424383 I | cephosd: stderr: Unknown device, --name=, --path=, or absolute path in /dev/ or /sys expected.
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring osd tree -f json
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring -i - osd new cd6e9cf1-b236-4111-b059-ebab6411350b 0
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/sbin/cryptsetup --batch-mode --key-size 512 --key-file - luksFormat /mnt/set1-data-0vt9cg
+Running command: /usr/sbin/cryptsetup --key-size 512 --key-file - --allow-discards luksOpen /mnt/set1-data-0vt9cg ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt
+Running command: /usr/bin/mount -t tmpfs tmpfs /var/lib/ceph/osd/ceph-0
+Running command: /usr/bin/chown -R ceph:ceph /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt
+Running command: /usr/bin/ln -s /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt /var/lib/ceph/osd/ceph-0/block
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring mon getmap -o /var/lib/ceph/osd/ceph-0/activate.monmap
+ stderr: got monmap epoch 3
+--> Creating keyring file for osd.0
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0/keyring
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-0/
+Running command: /usr/bin/ceph-osd --cluster ceph --osd-objectstore bluestore-rdr --mkfs -i 0 --monmap /var/lib/ceph/osd/ceph-0/activate.monmap --keyfile - --osd-data /var/lib/ceph/osd/ceph-0/ --osd-uuid cd6e9cf1-b236-4111-b059-ebab6411350b --setuser ceph --setgroup ceph
+ stderr: 2023-08-23T05:26:23.232+0000 7f6c544e9840 -1 bluestore-rdr(/var/lib/ceph/osd/ceph-0/) _read_fsid unparsable uuid
+--> ceph-volume raw dmcrypt prepare successful for: /mnt/set1-data-0vt9cg
+2023-08-23 05:26:25.427581 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt --format json
+2023-08-23 05:26:26.305220 D | cephosd: {}
+2023-08-23 05:26:26.306330 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2023-08-23 05:26:26.306362 D | exec: Running command: cryptsetup luksDump /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt
+2023-08-23 05:26:26.322981 E | cephosd: failed to determine if the encrypted block "/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt" is from our cluster. failed to dump LUKS header for disk "/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt". Device /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt is not a valid LUKS device.: exit status 1
+2023-08-23 05:26:26.323036 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt --format json
+2023-08-23 05:26:26.804776 D | cephosd: {
+    "cd6e9cf1-b236-4111-b059-ebab6411350b": {
+        "ceph_fsid": "af304b88-19ef-44f0-8e16-29c56c9a542a",
+        "device": "/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt",
+        "osd_id": 0,
+        "osd_uuid": "cd6e9cf1-b236-4111-b059-ebab6411350b",
+        "type": "bluestore-rdr"
+    }
+}
+2023-08-23 05:26:26.806931 D | exec: Running command: lsblk /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2023-08-23 05:26:26.811863 D | sys: lsblk output: "SIZE=\"10720641024\" ROTA=\"1\" RO=\"0\" TYPE=\"crypt\" PKNAME=\"\" NAME=\"/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt\" KNAME=\"/dev/dm-0\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2023-08-23 05:26:26.812156 I | cephosd: setting device class "hdd" for device "/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt"
+2023-08-23 05:26:26.813056 D | exec: Running command: cryptsetup luksDump /mnt/set1-data-0vt9cg
+2023-08-23 05:26:26.824238 E | cephosd: failed to find ceph_fsid in the LUKS header, the encrypted disk is not from a ceph cluster
+2023-08-23 05:26:26.824476 I | cephosd: setting LUKS subsystem to "ceph_fsid=af304b88-19ef-44f0-8e16-29c56c9a542a" and label to "pvc_name=set1-data-0vt9cg" to disk "/mnt/set1-data-0vt9cg"
+2023-08-23 05:26:26.824484 D | exec: Running command: cryptsetup config /mnt/set1-data-0vt9cg --subsystem ceph_fsid=af304b88-19ef-44f0-8e16-29c56c9a542a --label pvc_name=set1-data-0vt9cg
+2023-08-23 05:26:26.842072 I | cephosd: successfully set LUKS subsystem to "ceph_fsid=af304b88-19ef-44f0-8e16-29c56c9a542a" and label to "pvc_name=set1-data-0vt9cg" to disk "/mnt/set1-data-0vt9cg"
+2023-08-23 05:26:26.842115 D | exec: Running command: cryptsetup --verbose luksClose /dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt
+2023-08-23 05:26:26.863301 I | cephosd: dm version:
+Command successful.
+2023-08-23 05:26:26.863346 I | cephosd: 1 ceph-volume raw osd devices configured on this node
+2023-08-23 05:26:26.864794 I | cephosd: devices = [{ID:0 Cluster:ceph UUID:cd6e9cf1-b236-4111-b059-ebab6411350b DevicePartUUID: DeviceClass:hdd BlockPath:/dev/mapper/ceph-cd6e9cf1-b236-4111-b059-ebab6411350b-vdc-block-dmcrypt MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore-rdr TopologyAffinity: Encrypted:true ExportService:false NodeName: PVCName:}]

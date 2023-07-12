@@ -15,7 +15,7 @@ echo "**** Build new LSO image ****"
 cd ~/go/src/github.com/rook/rook
 for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
 
-docker tag build-a69cca94/ceph-amd64:latest $LOCAL_ROOK_IMAGE
+docker tag build-8df2d0f4/ceph-amd64:latest $LOCAL_ROOK_IMAGE
 
 function copy_image_to_cluster(){
     local build_image=$1

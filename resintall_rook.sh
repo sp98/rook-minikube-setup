@@ -16,7 +16,7 @@ function sed_changes() {
 sed_changes
 
 echo "**** Deploying Rook Cluster ****"
-cd ~/go/src/github.com/rook/rook/cluster/examples/kubernetes/ceph
+cd ~/go/src/github.com/rook/rook/deploy/examples
 
 echo "**** Apply common ****"
 kubectl create -f common.yaml

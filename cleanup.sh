@@ -9,20 +9,20 @@
 # 5. Delete the operator
 # 6. Delete the common yaml
 
-echo "**** add clean up policy ****"
-#kubectl -n rook-ceph patch cephcluster rook-ceph --type merge -p '{"spec":{"cleanupPolicy":{"confirmation":"yes-really-destroy-data"}}}'
-kubectl get cephclusters.ceph.rook.io rook-ceph -n rook-ceph -o yaml | sed -z "s/cleanupPolicy:/&\n \ \ \ confirmation: yes-really-destroy-data/2" |  kubectl replace -f -
+# echo "**** add clean up policy ****"
+kubectl -n rook-ceph patch cephcluster rook-ceph --type merge -p '{"spec":{"cleanupPolicy":{"confirmation":"yes-really-destroy-data"}}}'
+# kubectl get cephclusters.ceph.rook.io rook-ceph -n rook-ceph -o yaml | sed -z "s/cleanupPolicy:/&\n \ \ \ confirmation: yes-really-destroy-data/2" |  kubectl replace -f -
 
 sleep 5
 
 echo "**** delete ceph cluster ****"
 kubectl delete cephclusters.ceph.rook.io  rook-ceph -n rook-ceph
 
-echo "**** wait for all three clean up jobs to complete ****"
-while [[ $(kubectl get jobs -n rook-ceph -l app=rook-ceph-cleanup -o 'jsonpath={..status.conditions[?(@.type=="Complete")].status}') != "True True True" ]]; do echo "waiting for clean up jobs" && sleep 5; done
+# echo "**** wait for all three clean up jobs to complete ****"
+# while [[ $(kubectl get jobs -n rook-ceph -l app=rook-ceph-cleanup -o 'jsonpath={..status.conditions[?(@.type=="Complete")].status}') != "True True True" ]]; do echo "waiting for clean up jobs" && sleep 5; done
 
-echo "**** Deploying Rook Cluster ****"
-cd ~/go/src/github.com/rook/rook/cluster/examples/kubernetes/ceph
+echo "**** Deleting Rook Cluster ****"
+cd ~/go/src/github.com/rook/rook/deploy/examples
 
 echo "**** delete Rook Operator ****"
 kubectl delete -f operator.yaml
