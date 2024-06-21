@@ -22,7 +22,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -48,7 +48,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -73,7 +73,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -97,7 +97,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -121,7 +121,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -145,7 +145,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 10Gi
+    storage: 256Mi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -168,26 +168,27 @@ metadata:
   name: rook-ceph
   namespace: rook-ceph
 spec:
+  network:
   security:
-    # Settings to enable key rotation for KEK(Key Encryption Key).
-    # Currently, this is supported only for the default encryption type,
-    # using kubernetes secrets.
-    keyRotation:
-      enabled: true
-      # The schedule, written in [cron format](https://en.wikipedia.org/wiki/Cron),
-      # with which key rotation [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
-      # is created. The default value is `"@weekly"`.
-      schedule: "@monthly"
-    # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
-    kms:
-      # name of the config map containing all the kms connection details
-      connectionDetails:
-        KMS_PROVIDER: "vault"
-        VAULT_ADDR: http://vault.default.svc.cluster.local:8200 # e,g: https://vault.my-domain.com:8200
-        VAULT_BACKEND_PATH: "rook"
-        VAULT_SECRET_ENGINE: "kv-v2"
-      # name of the secret containing the kms authentication token
-      tokenSecretName: rook-vault-token
+    # # Settings to enable key rotation for KEK(Key Encryption Key).
+    # # Currently, this is supported only for the default encryption type,
+    # # using kubernetes secrets.
+    # keyRotation:
+    #   enabled: true
+    #   # The schedule, written in [cron format](https://en.wikipedia.org/wiki/Cron),
+    #   # with which key rotation [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+    #   # is created. The default value is `"@weekly"`.
+    #   schedule: "@monthly"
+    # # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
+    # kms:
+    #   # name of the config map containing all the kms connection details
+    #   connectionDetails:
+    #     KMS_PROVIDER: "vault"
+    #     VAULT_ADDR: http://vault.default.svc.cluster.local:8200 # e,g: https://vault.my-domain.com:8200
+    #     VAULT_BACKEND_PATH: "rook"
+    #     VAULT_SECRET_ENGINE: "kv-v2"
+    #   # name of the secret containing the kms authentication token
+    #   tokenSecretName: rook-vault-token
   dataDirHostPath: /var/lib/rook
   mon:
     count: 3
@@ -197,10 +198,11 @@ spec:
         storageClassName: local-storage
         resources:
           requests:
-            storage: 10Gi
+            storage: 256Mi
   cephVersion:
     image: quay.io/guits/ceph-volume:bs-rdr
-    # image: quay.io/ceph/ceph:v17.2.6
+    # image: quay.io/ceph/ceph:v18.2.1
+    # image: quay.io/ceph/daemon-base:latest-devel
     # image: quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy
     allowUnsupported: true
   skipUpgradeChecks: false
@@ -216,8 +218,8 @@ spec:
   crashCollector:
     disable: false
   storage:
-    # store: 
-    #   type: bluestore
+    store: 
+      type: bluestore
     storageClassDeviceSets:
       - name: set1
         count: 3
@@ -270,7 +272,7 @@ spec:
             spec:
               resources:
                 requests:
-                  storage: 10Gi
+                  storage: 256Mi
               # IMPORTANT: Change the storage class depending on your environment
               storageClassName: local-storage
               volumeMode: Block
@@ -296,10 +298,21 @@ spec:
     pgHealthCheckTimeout: 0
 
 ---
-apiVersion: v1
-kind: Secret
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: rook-vault-token
+#   namespace: rook-ceph # namespace:cluster
+# data:
+#   token: aHZzLkNBRVNJSko5c2Y3VWtObFZLY0VweVlxQVVfNWdpZnFEY3VIWTg5SS1qemtFQ2xGb0doNEtIR2gyY3k1U01VaFNUMHRSTTBSRGIxVktUM0E0UWxwNGR6RXphR3c=
+
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
 metadata:
-  name: rook-vault-token
+  name: builtin-mgr
   namespace: rook-ceph # namespace:cluster
-data:
-  token: aHZzLkNBRVNJSko5c2Y3VWtObFZLY0VweVlxQVVfNWdpZnFEY3VIWTg5SS1qemtFQ2xGb0doNEtIR2gyY3k1U01VaFNUMHRSTTBSRGIxVktUM0E0UWxwNGR6RXphR3c=
+spec:
+  name: .mgr
+  replicated:
+    size: 1
+    requireSafeReplicaSize: false

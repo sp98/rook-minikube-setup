@@ -4,8 +4,12 @@ echo "*** Creating a minikube environment for local testing of Rook ***"
 
 # Create a minikube cluster
 
-# minikube delete 
-# minikube start -n 4 --driver=kvm2 --extra-disks=3 --disk-size=10gb
+minikube delete 
+minikube start -n 3 --driver=kvm2 --extra-disks=2 --disk-size=10gb 
+
+#--memory=10g
+
+#
 # --kubernetes-version v1.15.0
 # Add storage to a minikube cluster
 # echo "*** adding storage device in minikube ***"

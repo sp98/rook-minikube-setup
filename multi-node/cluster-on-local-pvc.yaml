@@ -131,7 +131,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - minikube-m04
+                - minikube
 ---
 kind: PersistentVolume
 apiVersion: v1
@@ -154,7 +154,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - minikube-m04
+                - minikube
 ---
 apiVersion: ceph.rook.io/v1
 kind: CephCluster
@@ -162,26 +162,28 @@ metadata:
   name: rook-ceph
   namespace: rook-ceph
 spec:
-  security:
-  # Settings to enable key rotation for KEK(Key Encryption Key).
-  # Currently, this is supported only for the default encryption type,
-  # using kubernetes secrets.
-    keyRotation:
-      enabled: true
-      # The schedule, written in [cron format](https://en.wikipedia.org/wiki/Cron),
-      # with which key rotation [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
-      # is created. The default value is `"@weekly"`.
-      schedule: "@monthly"
-    # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
-    kms:
-      # name of the config map containing all the kms connection details
-      connectionDetails:
-        KMS_PROVIDER: "vault"
-        VAULT_ADDR: http://vault.default.svc.cluster.local:8200 
-        VAULT_BACKEND_PATH: "rook"
-        VAULT_SECRET_ENGINE: "kv-v2"
-      # name of the secret containing the kms authentication token
-      tokenSecretName: rook-vault-token
+  # network:
+    # provider: host
+  # security:
+  # # Settings to enable key rotation for KEK(Key Encryption Key).
+  # # Currently, this is supported only for the default encryption type,
+  # # using kubernetes secrets.
+  #   keyRotation:
+  #     enabled: true
+  #     # The schedule, written in [cron format](https://en.wikipedia.org/wiki/Cron),
+  #     # with which key rotation [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
+  #     # is created. The default value is `"@weekly"`.
+  #     schedule: "@monthly"
+  #   # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
+  #   kms:
+  #     # name of the config map containing all the kms connection details
+  #     connectionDetails:
+  #       KMS_PROVIDER: "vault"
+  #       VAULT_ADDR: http://vault.default.svc.cluster.local:8200 
+  #       VAULT_BACKEND_PATH: "rook"
+  #       VAULT_SECRET_ENGINE: "kv-v2"
+  #     # name of the secret containing the kms authentication token
+  #     tokenSecretName: rook-vault-token
   cleanupPolicy:
     confirmation: ""
     sanitizeDisks:
@@ -191,7 +193,7 @@ spec:
   dataDirHostPath: /var/lib/rook
   mon:
     count: 3
-    allowMultiplePerNode: true
+    allowMultiplePerNode: false
     volumeClaimTemplate:
       spec:
         storageClassName: local-storage
@@ -199,6 +201,7 @@ spec:
           requests:
             storage: 10Gi
   cephVersion:
+    # image: quay.io/ceph/ceph:v17.2.6
     image: quay.io/guits/ceph-volume:bs-rdr
     # image: quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy
     allowUnsupported: true
@@ -218,13 +221,14 @@ spec:
   storage:
     store: 
       type: bluestore
+      # updateStore: yes-really-update-store
     storageClassDeviceSets:
       - name: set1
         count: 3
         portable: false
         tuneDeviceClass: true
         tuneFastDeviceClass: false
-        encrypted: true
+        encrypted: false
         # placement:
         #   topologySpreadConstraints:
         #     - maxSkew: 1
@@ -291,6 +295,6 @@ spec:
     osd: system-node-critical
     mgr: system-cluster-critical
   disruptionManagement:
-    managePodBudgets: true
-    osdMaintenanceTimeout: 30
+    managePodBudgets: false
+    osdMaintenanceTimeout: 1
     pgHealthCheckTimeout: 0

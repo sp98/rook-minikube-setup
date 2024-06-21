@@ -1,0 +1,11 @@
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: mirrored-pool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 1
+  mirroring:
+    enabled: true
+    mode: image

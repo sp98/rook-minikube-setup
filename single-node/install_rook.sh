@@ -6,17 +6,21 @@ echo "**** deleting existing images ****"
 docker image rm -f build-8df2d0f4/ceph-amd64:latest
 docker image rm -f quay.io/sp1098/rook:local
 
-# CephImage="quay.io/ceph/ceph:v17.2.6"
-CephImage="quay.io/guits/ceph-volume:bs-rdr"
+#CephImage="quay.io/ceph/ceph:v17.2.6"
+# CephImage="quay.io/ceph/ceph:v18.2.2"
+# CephImage="quay.ceph.io/ceph-ci/ceph:wip-athakkar-testing-2023-12-08-1309"
+# cephImage="quay.io/guits/ceph-volume:bs-rdr"
+cephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-bs-compression-recompression-test"
 # CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
+# CephImage="quay.io/guits/ceph-volume:bs-rdr"
 # CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
-DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.9.0"
-DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.7.0"
-DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v3.4.0"
-DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.1.0"
-DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v6.2.1"
-DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.7.0"
-DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.5.0"
+DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.11.0"
+DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0"
+DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v4.0.0"
+DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.5.0"
+DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v7.0.1"
+DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.10.0"
+DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.8.0"
 
 function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultCSIPluginImage} 2> /dev/null)" == "" ]]; then
@@ -138,6 +142,8 @@ kubectl apply -f toolbox.yaml
 
 if [ "$1" == "OSD_ON_DEVICE" ]; then
 echo "**** Creating ceph Cluster with OSD on Devices ****"
+# cd /home/sapillai/scripts/rook-minikube-setup/single-node
+# kubectl create -f cluster_metadata.yaml  --validate=false
 kubectl create -f cluster.yaml  --validate=false
 fi
 
@@ -145,6 +151,7 @@ if [ "$1" == "OSD_ON_PVC" ]; then
 echo "**** Creating ceph Cluster with OSD on PVC ****"
 cd /home/sapillai/scripts/rook-minikube-setup/single-node
 kubectl create -f cluster-on-local-pvc.yaml
+# kubectl create -f cluster_kms_vault.yaml
 fi
 
 echo "*** Successfully install Rook (OSD on devices) on Minikube Cluster ****"

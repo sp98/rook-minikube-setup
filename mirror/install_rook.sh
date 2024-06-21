@@ -1,20 +1,12 @@
 #!/bin/bash -e
 
-echo "*** Installing Rook on Devices on a local multinode Minikube environment ***"
+echo "*** Installing Rook on Devices on a local Minikube environment with profile $PROFILE ***"
 
-echo "**** deleting existing images ****"
-docker image rm -f build-8df2d0f4/ceph-amd64:latest
-docker image rm -f quay.io/sp1098/rook:local
-
-# CephImage="quay.io/ceph/ceph:v17.2.6"
-# CephImage2="quay.io/ceph/ceph:v18.2.2"
-# CephImage="quay.ceph.io/ceph-ci/ceph:wip-athakkar-testing-2023-12-08-1309"
-# cephImage="quay.io/guits/ceph-volume:bs-rdr"
-# CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
-CephImage="quay.io/guits/ceph-volume:bs-rdr"
-# CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
+RookImage="quay.io/sp1098/rook:local"
+# CephImage="quay.io/ceph/ceph:v18.2.1"
+CephImage="quay.ceph.io/ceph-ci/ceph:wip-nbalacha-rbd-consistency-groups"
 DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.11.0"
-DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0"
+DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1"
 DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v4.0.1"
 DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.5.1"
 DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v7.0.2"
@@ -57,25 +49,28 @@ function pull_dependent_images(){
 
 pull_dependent_images
 
-echo "**** Build new rook image ****"
-cd ~/go/src/github.com/rook/rook
-for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
 
-docker tag build-8df2d0f4/ceph-amd64:latest quay.io/sp1098/rook:local
-docker image push quay.io/sp1098/rook:local
+# build new rook image if its not present
+if [[ "$(docker images -q ${RookImage} 2> /dev/null)" == "" ]]; then
+        echo "**** Build new rook image ****"
+        cd ~/go/src/github.com/rook/rook
+        for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
+
+        docker tag build-8df2d0f4/ceph-amd64:latest quay.io/sp1098/rook:local
+fi
+
+
 
 function copy_image_to_cluster(){
     local build_image=$1
-#     docker save "${build_image}" |  minikube ssh -n m02  docker load
-#     docker save "${build_image}" |  minikube ssh -n m03  docker load
-#     docker save "${build_image}" |  minikube ssh -n m04  docker 
-    minikube image load "${build_image}"
+    local final_image=$2
+    docker save "${build_image}" | (eval "$(minikube --profile="${PROFILE}" docker-env --shell bash)" && docker load)
 }
+
 
 function copy_images_to_minikube() {
       echo "**** copying rook image to minikube cluster ****"
       copy_image_to_cluster quay.io/sp1098/rook:local
-      # copy_image_to_cluster rook/ceph:master
 
       echo "**** copying ceph image to minikube cluster ****"
       copy_image_to_cluster $CephImage
@@ -92,14 +87,7 @@ function copy_images_to_minikube() {
 
 function sed_changes() {
       echo "**** updating manifest files in ceph directory ****"
-
-      echo "**** change rook image name ****"
       sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./operator.yaml
-
-      if [ "$2" == "OSD_ON_PVC" ]; then
-           echo "**** change storage class name ****"
-           sed -i "s/storageClassName: gp2/storageClassName: manual/" ./cluster-on-pvc.yaml
-      fi
 }
 
 
@@ -107,42 +95,104 @@ echo "**** Deploying Rook Cluster ****"
 cd ~/go/src/github.com/rook/rook/deploy/examples
 
 # update rook ceph manifest files to use local builds etc.
-sed_changes "$2"
+sed_changes
 
 # copy relevant images to minikube/Kind cluster to save time in downloading these images inside the cluster.
 
-# copy_images_to_minikube
+copy_images_to_minikube
 
 
 echo "**** Apply common ****"
-kubectl create -f common.yaml
+kubectl create -f common.yaml --context=${PROFILE}
 
 
 echo "**** Apply crds ****"
 #kubectl create -f pre-k8s-1.16/crds.yaml
-kubectl create -f crds.yaml
+kubectl create -f crds.yaml --context=${PROFILE}
 
 echo "**** Starting Rook Operator ****"
-kubectl create -f operator.yaml
+kubectl create -f operator.yaml --context=${PROFILE}
 
 while [[ $(kubectl get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
 OperatorPOD=$(kubectl get pod -l app=rook-ceph-operator -o custom-columns=:metadata.name -n rook-ceph)
 
 echo "**** Creating Toolbox ****"
-kubectl apply -f toolbox.yaml
+kubectl apply -f toolbox.yaml --context=${PROFILE}
 
-if [ "$1" == "OSD_ON_DEVICE" ]; then
-echo "**** Creating ceph Cluster with OSD on Devices ****"
-kubectl create -f cluster.yaml  --validate=false
-fi
+while [[ $(kubectl get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
+OperatorPOD=$(kubectl get pod -l app=rook-ceph-operator -o custom-columns=:metadata.name -n rook-ceph)
 
-if [ "$1" == "OSD_ON_PVC" ]; then
-echo "**** Creating ceph Cluster with OSD on PVC ****"
-cd /home/sapillai/scripts/rook-minikube-setup/multi-node
-kubectl create -f cluster-on-local-pvc.yaml
-fi
+# cat <<EOF | kubectl --context=${PROFILE} apply -f -
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: my-cluster
+  namespace: rook-ceph # namespace:cluster
+spec:
+  dataDirHostPath: /var/lib/rook
+  cephVersion:
+    # image: quay.io/ceph/ceph:v18.2.1
+    image: quay.ceph.io/ceph-ci/ceph:wip-nbalacha-rbd-consistency-groups
+    allowUnsupported: true
+  mon:
+    count: 1
+    allowMultiplePerNode: true
+  mgr:
+    count: 1
+    allowMultiplePerNode: true
+  dashboard:
+    enabled: true
+  crashCollector:
+    disable: true
+  storage:
+    useAllNodes: true
+    useAllDevices: true
+    #deviceFilter:
+  monitoring:
+    enabled: false
+  healthCheck:
+    daemonHealth:
+      mon:
+        interval: 45s
+        timeout: 600s
+  priorityClassNames:
+    all: system-node-critical
+    mgr: system-cluster-critical
+  disruptionManagement:
+    managePodBudgets: true
+  cephConfig:
+    global:
+      osd_pool_default_size: "1"
+      mon_warn_on_pool_no_redundancy: "false"
+      bdev_flock_retry: "20"
+      bluefs_buffered_io: "false"
+      mon_data_avail_warn: "10"
+---
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: builtin-mgr
+  namespace: rook-ceph # namespace:cluster
+spec:
+  name: .mgr
+  replicated:
+    size: 1
+    requireSafeReplicaSize: false
+EOF
 
-echo "*** Successfully install Rook (OSD on devices) on Minikube Cluster ****"
+# cat <<EOF | kubectl --context=${PROFILE} apply -f -
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: mirrored-pool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 1
+  mirroring:
+    enabled: true
+    mode: image
+EOF
 
-echo "*** watching rook operator logs ****"
-kubectl logs --follow $OperatorPOD -n rook-ceph
+echo "*** Successfully install Rook (OSD on devices) on Minikube Cluster  with profile $PROFILE ****"
+

@@ -1,3 +1,7 @@
+minikube_rook_mirror_setup:
+	@echo "*** settting up rook with mirroring ***"
+	@sh ./mirror/setup.sh
+
 minikube_rook_devices_setup:
 	@echo "** Installing Rook with OSD on devices on minikube **"
 	@sh ./single-node/create_env.sh OSD_ON_DEVICE

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csi-kms-connection-details
+  namespace: openshift-storage
+data:
+  AZURE_CERT_SECRET_NAME: "azure-ocs-ffwc9o1j"
+  AZURE_CLIENT_ID: "az-client-id1"
+  AZURE_TENANT_ID: "az-tenant-id1"
+  AZURE_VAULT_URL: "https://sapillai-kv2.vault.azure.net"
+  KMS_PROVIDER: "azure-kv"
