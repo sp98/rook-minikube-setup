@@ -12,4 +12,4 @@ fi
 
 echo "*** Creating a minikube environment for local testing of Rook with profile $PROFILE ***"
 
-minikube start --driver=kvm2 --extra-disks=3 --disk-size=10gb  --profile="${PROFILE}"
+minikube start --driver=kvm2 --extra-disks=3 --disk-size=10gb  --profile="${PROFILE}" --network default

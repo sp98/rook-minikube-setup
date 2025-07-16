@@ -1,0 +1,26 @@
+#################################################################################################################
+# Create a Ceph pool with settings a test environment. Only a single OSD is required.
+#  kubectl create -f pool-test.yaml
+#################################################################################################################
+
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph # namespace:cluster
+spec:
+  failureDomain: osd
+  replicated:
+    size: 1
+---
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPoolRadosNamespace
+metadata:
+  name: namespace-a
+  namespace: rook-ceph # namespace:cluster
+spec:
+  # The name of the RADOS namespace. If not set, the default is the name of the CR.
+  # name: namespace-a
+  # blockPoolName is the name of the CephBlockPool CR where the namespace will be created.
+  blockPoolName: replicapool
+---

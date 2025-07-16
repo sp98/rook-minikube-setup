@@ -4,14 +4,17 @@ echo "*** Installing Rook on Devices on a local Minikube environment with profil
 
 RookImage="quay.io/sp1098/rook:local"
 # CephImage="quay.io/ceph/ceph:v18.2.1"
-CephImage="quay.ceph.io/ceph-ci/ceph:wip-nbalacha-rbd-consistency-groups"
-DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.11.0"
-DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1"
-DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v4.0.1"
-DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.5.1"
-DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v7.0.2"
-DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.10.1"
-DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.8.0"
+# CephImage="quay.ceph.io/ceph-ci/ceph:wip-pdonnell-63ad580c-debug"
+# CephImage="quay.ceph.io/ceph-ci/ceph:wip-pdonnell-9c97213a-debug"
+# CephImage1="quay.ceph.io/ceph-ci/ceph:wip-pdonnell-63ad580c-debug"
+CephImage="quay.ceph.io/ceph-ci/ceph:main"
+DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.14.0"
+DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0"
+DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v5.2.0"
+DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.8.1"
+DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v8.2.1"
+DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.13.2"
+DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.12.0"
 
 function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultCSIPluginImage} 2> /dev/null)" == "" ]]; then
@@ -47,7 +50,7 @@ function pull_dependent_images(){
     fi
 }
 
-pull_dependent_images
+# pull_dependent_images
 
 
 # build new rook image if its not present
@@ -56,10 +59,10 @@ if [[ "$(docker images -q ${RookImage} 2> /dev/null)" == "" ]]; then
         cd ~/go/src/github.com/rook/rook
         for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
 
-        docker tag build-8df2d0f4/ceph-amd64:latest quay.io/sp1098/rook:local
+        docker tag build-b11aa2f7/ceph-amd64:latest quay.io/sp1098/rook:local
 fi
 
-
+docker image push quay.io/sp1098/rook:local
 
 function copy_image_to_cluster(){
     local build_image=$1
@@ -70,10 +73,12 @@ function copy_image_to_cluster(){
 
 function copy_images_to_minikube() {
       echo "**** copying rook image to minikube cluster ****"
-      copy_image_to_cluster quay.io/sp1098/rook:local
+      copy_image_to_cluster $RookImage
 
       echo "**** copying ceph image to minikube cluster ****"
       copy_image_to_cluster $CephImage
+
+      copy_image_to_cluster $CephImage1
 
       echo "**** copying ceph dependencies ****"
       copy_image_to_cluster $DefaultCSIPluginImage
@@ -82,12 +87,12 @@ function copy_images_to_minikube() {
       copy_image_to_cluster $DefaultAttacherImage
       copy_image_to_cluster $DefaultSnapshotterImage
       copy_image_to_cluster $DefaultResizerImage
-      copy_image_to_cluster $DefaultVolumeReplicationImage
 }
 
 function sed_changes() {
       echo "**** updating manifest files in ceph directory ****"
-      sed -i "s/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./operator.yaml
+      sed -i "s/docker.io\/rook\/ceph:master/quay.io\/sp1098\/rook:local/" ./operator.yaml
+
 }
 
 
@@ -99,7 +104,7 @@ sed_changes
 
 # copy relevant images to minikube/Kind cluster to save time in downloading these images inside the cluster.
 
-copy_images_to_minikube
+# copy_images_to_minikube
 
 
 echo "**** Apply common ****"
@@ -113,26 +118,30 @@ kubectl create -f crds.yaml --context=${PROFILE}
 echo "**** Starting Rook Operator ****"
 kubectl create -f operator.yaml --context=${PROFILE}
 
-while [[ $(kubectl get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
+while [[ $(kubectl --context=${PROFILE} get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
 OperatorPOD=$(kubectl get pod -l app=rook-ceph-operator -o custom-columns=:metadata.name -n rook-ceph)
 
 echo "**** Creating Toolbox ****"
 kubectl apply -f toolbox.yaml --context=${PROFILE}
 
-while [[ $(kubectl get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
-OperatorPOD=$(kubectl get pod -l app=rook-ceph-operator -o custom-columns=:metadata.name -n rook-ceph)
+# while [[ $(kubectl get pods -l app=rook-ceph-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' -n rook-ceph) != "True" ]]; do echo "waiting for rook operator pod" && sleep 5; done
+# OperatorPOD=$(kubectl get pod -l app=rook-ceph-operator -o custom-columns=:metadata.name -n rook-ceph)
 
-# cat <<EOF | kubectl --context=${PROFILE} apply -f -
+cat <<EOF | kubectl --context=${PROFILE} apply -f -
 apiVersion: ceph.rook.io/v1
 kind: CephCluster
 metadata:
   name: my-cluster
   namespace: rook-ceph # namespace:cluster
 spec:
+  network:
+    provider: host
   dataDirHostPath: /var/lib/rook
   cephVersion:
-    # image: quay.io/ceph/ceph:v18.2.1
-    image: quay.ceph.io/ceph-ci/ceph:wip-nbalacha-rbd-consistency-groups
+    image: quay.ceph.io/ceph-ci/ceph:main
+    # image: quay.ceph.io/ceph-ci/ceph:wip-pdonnell-9c97213a-debug
+    # image: quay.ceph.io/ceph-ci/ceph:wip-pdonnell-7fcbc500-debug
+    # image: quay.ceph.io/ceph-ci/ceph:wip-pdonnell-63ad580c-debug
     allowUnsupported: true
   mon:
     count: 1
@@ -180,7 +189,7 @@ spec:
     requireSafeReplicaSize: false
 EOF
 
-# cat <<EOF | kubectl --context=${PROFILE} apply -f -
+cat <<EOF | kubectl --context=${PROFILE} apply -f -
 apiVersion: ceph.rook.io/v1
 kind: CephBlockPool
 metadata:

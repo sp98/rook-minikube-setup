@@ -1,0 +1,461 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    banzaicloud.com/last-applied: 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
+    deployment.kubernetes.io/revision: "2"
+  creationTimestamp: "2025-02-17T07:34:22Z"
+  generation: 6
+  labels:
+    app: rook-ceph-osd
+    app.kubernetes.io/component: cephclusters.ceph.rook.io
+    app.kubernetes.io/created-by: rook-ceph-operator
+    app.kubernetes.io/instance: "0"
+    app.kubernetes.io/managed-by: rook-ceph-operator
+    app.kubernetes.io/name: ceph-osd
+    app.kubernetes.io/part-of: rook-ceph
+    ceph-osd-id: "0"
+    ceph-version: 19.2.0-0
+    ceph.rook.io/DeviceSet: set3
+    ceph.rook.io/pvc: set3-data-0zbqbz
+    ceph_daemon_id: "0"
+    ceph_daemon_type: osd
+    device-class: hdd
+    encrypted: "false"
+    failure-domain: minikube-m03
+    osd: "0"
+    osd-store: bluestore
+    portable: "false"
+    rook-version: v1.16.0-alpha.0.262.gd37030b11-dirty
+    rook.io/operator-namespace: rook-ceph
+    rook_cluster: rook-ceph
+    topology-location-host: minikube-m03
+    topology-location-root: default
+  name: rook-ceph-osd-0
+  namespace: rook-ceph
+  ownerReferences:
+  - apiVersion: ceph.rook.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: CephCluster
+    name: rook-ceph
+    uid: 859ad567-ace5-4597-97e9-630e42fe84cf
+  resourceVersion: "559073"
+  uid: 2f271af5-c945-4605-9a87-0ce500539d1f
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: rook-ceph-osd
+      ceph-osd-id: "0"
+      rook_cluster: rook-ceph
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: rook-ceph-osd
+        app.kubernetes.io/component: cephclusters.ceph.rook.io
+        app.kubernetes.io/created-by: rook-ceph-operator
+        app.kubernetes.io/instance: "0"
+        app.kubernetes.io/managed-by: rook-ceph-operator
+        app.kubernetes.io/name: ceph-osd
+        app.kubernetes.io/part-of: rook-ceph
+        ceph-osd-id: "0"
+        ceph.rook.io/DeviceSet: set3
+        ceph.rook.io/pvc: set3-data-0zbqbz
+        ceph_daemon_id: "0"
+        ceph_daemon_type: osd
+        device-class: hdd
+        encrypted: "false"
+        failure-domain: minikube-m03
+        osd: "0"
+        osd-store: bluestore
+        portable: "false"
+        rook.io/operator-namespace: rook-ceph
+        rook_cluster: rook-ceph
+        topology-location-host: minikube-m03
+        topology-location-root: default
+      name: rook-ceph-osd
+    spec:
+      affinity: {}
+      containers:
+      - args:
+        - --foreground
+        - --id
+        - "0"
+        - --fsid
+        - ae43c5ed-cd6d-49d6-8072-3a3176417232
+        - --setuser
+        - ceph
+        - --setgroup
+        - ceph
+        - --crush-location=root=default host=minikube-m03
+        - --osd-recovery-sleep=0.1
+        - --osd-snap-trim-sleep=2
+        - --osd-delete-sleep=2
+        - --default-log-to-stderr=true
+        - --default-err-to-stderr=true
+        - --default-mon-cluster-log-to-stderr=true
+        - '--default-log-stderr-prefix=debug '
+        - --default-log-to-file=false
+        - --default-mon-cluster-log-to-file=false
+        - --ms-learn-addr-from-peer=false
+        command:
+        - ceph-osd
+        env:
+        - name: ROOK_NODE_NAME
+          value: minikube-m03
+        - name: ROOK_CLUSTER_ID
+          value: 859ad567-ace5-4597-97e9-630e42fe84cf
+        - name: ROOK_CLUSTER_NAME
+          value: rook-ceph
+        - name: ROOK_PRIVATE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: ROOK_PUBLIC_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: POD_NAMESPACE
+          value: rook-ceph
+        - name: ROOK_MON_ENDPOINTS
+          valueFrom:
+            configMapKeyRef:
+              key: data
+              name: rook-ceph-mon-endpoints
+        - name: ROOK_CONFIG_DIR
+          value: /var/lib/rook
+        - name: ROOK_CEPH_CONFIG_OVERRIDE
+          value: /etc/rook/config/override.conf
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: ROOK_CRUSHMAP_ROOT
+          value: default
+        - name: ROOK_CRUSHMAP_HOSTNAME
+        - name: CEPH_VOLUME_DEBUG
+          value: "1"
+        - name: CEPH_VOLUME_SKIP_RESTORECON
+          value: "1"
+        - name: DM_DISABLE_UDEV
+          value: "1"
+        - name: CONTAINER_IMAGE
+          value: quay.io/ceph/ceph:v19.2.0
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              divisor: "0"
+              resource: limits.memory
+        - name: POD_MEMORY_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              divisor: "0"
+              resource: requests.memory
+        - name: POD_CPU_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              divisor: "1"
+              resource: limits.cpu
+        - name: POD_CPU_REQUEST
+          valueFrom:
+            resourceFieldRef:
+              divisor: "0"
+              resource: requests.cpu
+        - name: CEPH_USE_RANDOM_NONCE
+          value: "true"
+        - name: ROOK_OSD_RESTART_INTERVAL
+          value: "0"
+        - name: ROOK_OSD_UUID
+          value: 26ea9ab5-2507-4cb9-b456-23bba64843fd
+        - name: ROOK_OSD_ID
+          value: "0"
+        - name: ROOK_CEPH_MON_HOST
+          valueFrom:
+            secretKeyRef:
+              key: mon_host
+              name: rook-ceph-config
+        - name: CEPH_ARGS
+          value: -m $(ROOK_CEPH_MON_HOST)
+        - name: ROOK_BLOCK_PATH
+          value: /mnt/set3-data-0zbqbz
+        - name: ROOK_CV_MODE
+          value: raw
+        - name: ROOK_OSD_DEVICE_CLASS
+          value: hdd
+        - name: ROOK_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: ROOK_OSD_PVC_SIZE
+          value: "1"
+        - name: ROOK_PVC_BACKED_OSD
+          value: "true"
+        envFrom:
+        - configMapRef:
+            name: rook-ceph-osd-env-override
+            optional: true
+        image: quay.io/ceph/ceph:v19.2.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - env
+            - -i
+            - sh
+            - -c
+            - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-osd.0.asok status 2>&1)\"\nrc=$?\nif
+              [ $rc -ne 0 ] && [ ! -f /tmp/osd-sleep ]; then\n\techo \"ceph daemon
+              health check failed with the following output:\"\n\techo \"$outp\" |
+              sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: osd
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+          privileged: true
+          readOnlyRootFilesystem: false
+          runAsUser: 0
+        startupProbe:
+          exec:
+            command:
+            - env
+            - -i
+            - sh
+            - -c
+            - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-osd.0.asok status 2>&1)\"\nrc=$?\nif
+              [ $rc -ne 0 ] && [ ! -f /tmp/osd-sleep ]; then\n\techo \"ceph daemon
+              health check failed with the following output:\"\n\techo \"$outp\" |
+              sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+          failureThreshold: 720
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/rook
+          name: rook-data
+        - mountPath: /etc/ceph
+          name: rook-config-override
+          readOnly: true
+        - mountPath: /run/ceph
+          name: ceph-daemons-sock-dir
+        - mountPath: /var/log/ceph
+          name: rook-ceph-log
+        - mountPath: /var/lib/ceph/crash
+          name: rook-ceph-crash
+        - mountPath: /run/udev
+          name: run-udev
+        - mountPath: /var/lib/ceph/osd/ceph-0
+          name: set3-data-0zbqbz-bridge
+          subPath: ceph-0
+        workingDir: /var/log/ceph
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - command:
+        - /bin/bash
+        - -c
+        - "\nset -xe\n\nPVC_SOURCE=/set3-data-0zbqbz\nPVC_DEST=/var/lib/ceph/osd/ceph-0/block\nCP_ARGS=(--archive
+          --dereference --verbose)\n\nif [ -b \"$PVC_DEST\" ]; then\n\tPVC_SOURCE_MAJ_MIN=$(stat
+          --format '%t%T' $PVC_SOURCE)\n\tPVC_DEST_MAJ_MIN=$(stat --format '%t%T'
+          $PVC_DEST)\n\tif [[ \"$PVC_SOURCE_MAJ_MIN\" == \"$PVC_DEST_MAJ_MIN\" ]];
+          then\n\t\techo \"PVC $PVC_DEST already exists and has the same major and
+          minor as $PVC_SOURCE: \"$PVC_SOURCE_MAJ_MIN\"\"\n\t\texit 0\n\telse\n\t\techo
+          \"PVC's source major/minor numbers changed\"\n\t\tCP_ARGS+=(--remove-destination)\n\tfi\nfi\n\ncp
+          \"${CP_ARGS[@]}\" \"$PVC_SOURCE\" \"$PVC_DEST\"\n"
+        image: quay.io/ceph/ceph:v19.2.0
+        imagePullPolicy: IfNotPresent
+        name: blkdevmapper
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - MKNOD
+            drop:
+            - NET_RAW
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeDevices:
+        - devicePath: /set3-data-0zbqbz
+          name: set3-data-0zbqbz
+        volumeMounts:
+        - mountPath: /var/lib/ceph/osd/ceph-0
+          name: set3-data-0zbqbz-bridge
+          subPath: ceph-0
+      - args:
+        - prime-osd-dir
+        - --dev
+        - /var/lib/ceph/osd/ceph-0/block
+        - --path
+        - /var/lib/ceph/osd/ceph-0
+        - --no-mon-config
+        command:
+        - ceph-bluestore-tool
+        image: quay.io/ceph/ceph:v19.2.0
+        imagePullPolicy: IfNotPresent
+        name: activate
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeDevices:
+        - devicePath: /var/lib/ceph/osd/ceph-0/block
+          name: set3-data-0zbqbz
+        volumeMounts:
+        - mountPath: /var/lib/ceph/osd/ceph-0
+          name: set3-data-0zbqbz-bridge
+          subPath: ceph-0
+      - args:
+        - bluefs-bdev-expand
+        - --path
+        - /var/lib/ceph/osd/ceph-0
+        command:
+        - ceph-bluestore-tool
+        image: quay.io/ceph/ceph:v19.2.0
+        imagePullPolicy: IfNotPresent
+        name: expand-bluefs
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/ceph/osd/ceph-0
+          name: set3-data-0zbqbz-bridge
+          subPath: ceph-0
+      - args:
+        - --verbose
+        - --recursive
+        - ceph:ceph
+        - /var/log/ceph
+        - /var/lib/ceph/crash
+        - /run/ceph
+        - /var/lib/ceph/osd/ceph-0
+        command:
+        - chown
+        image: quay.io/ceph/ceph:v19.2.0
+        imagePullPolicy: IfNotPresent
+        name: chown-container-data-dir
+        resources: {}
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+          privileged: true
+          readOnlyRootFilesystem: false
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/rook
+          name: rook-data
+        - mountPath: /etc/ceph
+          name: rook-config-override
+          readOnly: true
+        - mountPath: /run/ceph
+          name: ceph-daemons-sock-dir
+        - mountPath: /var/log/ceph
+          name: rook-ceph-log
+        - mountPath: /var/lib/ceph/crash
+          name: rook-ceph-crash
+        - mountPath: /run/udev
+          name: run-udev
+        - mountPath: /var/lib/ceph/osd/ceph-0
+          name: set3-data-0zbqbz-bridge
+          subPath: ceph-0
+      nodeSelector:
+        kubernetes.io/hostname: minikube-m03
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: rook-ceph-osd
+      serviceAccountName: rook-ceph-osd
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: rook-data
+      - name: rook-config-override
+        projected:
+          defaultMode: 420
+          sources:
+          - configMap:
+              items:
+              - key: config
+                mode: 292
+                path: ceph.conf
+              name: rook-config-override
+      - hostPath:
+          path: /var/lib/rook/exporter
+          type: DirectoryOrCreate
+        name: ceph-daemons-sock-dir
+      - hostPath:
+          path: /var/lib/rook/rook-ceph/log
+          type: ""
+        name: rook-ceph-log
+      - hostPath:
+          path: /var/lib/rook/rook-ceph/crash
+          type: ""
+        name: rook-ceph-crash
+      - name: set3-data-0zbqbz
+        persistentVolumeClaim:
+          claimName: set3-data-0zbqbz
+      - hostPath:
+          path: /var/lib/rook/rook-ceph/set3-data-0zbqbz
+          type: DirectoryOrCreate
+        name: set3-data-0zbqbz-bridge
+      - hostPath:
+          path: /run/udev
+          type: ""
+        name: run-udev
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-17T07:34:22Z"
+    lastUpdateTime: "2025-02-17T09:17:38Z"
+    message: ReplicaSet "rook-ceph-osd-0-7995584bb5" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-24T09:47:36Z"
+    lastUpdateTime: "2025-02-24T09:47:36Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 6
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

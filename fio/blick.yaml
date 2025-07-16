@@ -1,0 +1,72 @@
+---
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: fio-job-config
+data:
+  fio.job: |-
+    [global]
+    ioengine=psync
+    direct=1
+    buffered=0
+    size=10G
+    iodepth=1000
+    numjobs=100
+    group_reporting
+    refill_buffers
+    rwmixread=80
+    norandommap
+    randrepeat=0
+    percentage_random=0
+    bs=512K
+    buffer_compress_percentage=50
+    rw=read
+    [testjob]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fio
+  labels:
+    app: fio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fio
+  template:
+    metadata:
+      labels:
+        app: fio
+    spec:
+      containers:
+      - name: fio
+        image: joshuarobinson/fio:3.19
+        command: ["sh"]
+        args: ["-c", "echo ${HOSTNAME} && mkdir -p /scratch/${HOSTNAME} && fio /configs/fio.job --eta=never --directory=/scratch/${HOSTNAME}"]
+        volumeMounts:
+        - name: fio-config-vol
+          mountPath: /configs
+        - name: fio-data
+          mountPath: /scratch
+        imagePullPolicy: Always
+      restartPolicy: Always
+      volumes:
+      - name: fio-config-vol
+        configMap:
+          name: fio-job-config
+      - name: fio-data
+        persistentVolumeClaim:
+          claimName: fio-claim
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: fio-claim
+spec:
+  storageClassName: rook-cephfs
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi

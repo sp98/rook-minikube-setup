@@ -1,0 +1,79 @@
+Name:                 cluster-cleanup-job-minikube-tch9q
+Namespace:            rook-ceph
+Priority:             2000001000
+Priority Class Name:  system-node-critical
+Service Account:      rook-ceph-default
+Node:                 minikube/192.168.39.167
+Start Time:           Wed, 19 Mar 2025 17:54:18 +0530
+Labels:               batch.kubernetes.io/controller-uid=28241c4e-f675-48e1-abe5-7b70291c562f
+                      batch.kubernetes.io/job-name=cluster-cleanup-job-minikube
+                      controller-uid=28241c4e-f675-48e1-abe5-7b70291c562f
+                      job-name=cluster-cleanup-job-minikube
+Annotations:          <none>
+Status:               Running
+IP:                   10.244.0.25
+IPs:
+  IP:           10.244.0.25
+Controlled By:  Job/cluster-cleanup-job-minikube
+Containers:
+  host-cleanup:
+    Container ID:  docker://fea022b77fb7f793b07099105eeec0edae900559eebc263606c066cca86d640b
+    Image:         quay.io/sp1098/rook:cl-3
+    Image ID:      docker-pullable://quay.io/sp1098/rook@sha256:744e711d5c9062b18eb0da9a737db2a8d488f80efaf78177f1f3387a54d766dc
+    Port:          <none>
+    Host Port:     <none>
+    Args:
+      ceph
+      clean
+      host
+    State:          Running
+      Started:      Wed, 19 Mar 2025 17:54:21 +0530
+    Ready:          True
+    Restart Count:  0
+    Environment:
+      ROOK_DATA_DIR_HOST_PATH:    /var/lib/rook
+      ROOK_NAMESPACE_DIR:         rook-ceph
+      ROOK_MON_SECRET:            AQCAk9pnGFWyFxAABRDK6xRBklRfphX6H0cozQ==
+      ROOK_CLUSTER_FSID:          fd3ba9d5-57fd-42f1-834f-b0a48c45ce52
+      ROOK_LOG_LEVEL:             DEBUG
+      POD_NAMESPACE:              rook-ceph
+      ROOK_SANITIZE_METHOD:       
+      ROOK_SANITIZE_DATA_SOURCE:  
+      ROOK_SANITIZE_ITERATION:    1
+    Mounts:
+      /dev from devices (rw)
+      /var/lib/rook from cleanup-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-8fwhh (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  cleanup-volume:
+    Type:          HostPath (bare host directory volume)
+    Path:          /var/lib/rook
+    HostPathType:  
+  devices:
+    Type:          HostPath (bare host directory volume)
+    Path:          /dev
+    HostPathType:  
+  kube-api-access-8fwhh:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              kubernetes.io/hostname=minikube
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  2m25s  default-scheduler  Successfully assigned rook-ceph/cluster-cleanup-job-minikube-tch9q to minikube
+  Normal  Pulled     2m23s  kubelet            Container image "quay.io/sp1098/rook:cl-3" already present on machine
+  Normal  Created    2m23s  kubelet            Created container host-cleanup
+  Normal  Started    2m22s  kubelet            Started container host-cleanup

@@ -1,0 +1,149 @@
+2024/09/27 06:51:28 maxprocs: Leaving GOMAXPROCS=2: CPU quota undefined
+2024-09-27 06:51:28.946503 I | cephcmd: desired devices to configure osds: [{Name:/mnt/set1-data-1nzvch OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2024-09-27 06:51:28.948959 I | rookcmd: starting Rook v1.15.0-alpha.0.162.gd872092d4-dirty with arguments '/rook/rook ceph osd provision'
+2024-09-27 06:51:28.949056 I | rookcmd: flag values: --cluster-id=e17881b1-73fe-47c1-933f-85d69efbb53a, --cluster-name=rook-ceph, --data-device-filter=, --data-device-path-filter=, --data-devices=[{"id":"/mnt/set1-data-1nzvch","storeConfig":{"osdsPerDevice":1}}], --encrypted-device=false, --force-format=false, --help=false, --location=, --log-level=DEBUG, --metadata-device=, --node-name=set1-data-1nzvch, --osd-crush-device-class=, --osd-crush-initial-weight=, --osd-database-size=0, --osd-store-type=bluestore, --osd-wal-size=576, --osds-per-device=1, --pvc-backed-osd=true, --replace-osd=2
+2024-09-27 06:51:28.949071 I | ceph-spec: parsing mon endpoints: a=10.111.198.109:6789,b=10.104.7.90:6789,c=10.110.49.231:6789
+2024-09-27 06:51:28.999254 I | op-osd: CRUSH location=root=default host=minikube-m02
+2024-09-27 06:51:28.999356 I | cephcmd: crush location of osd: root=default host=minikube-m02
+2024-09-27 06:51:29.010656 D | cephclient: No ceph configuration override to merge as "rook-config-override" configmap is empty
+2024-09-27 06:51:29.011675 I | cephclient: writing config file /var/lib/rook/rook-ceph/rook-ceph.config
+2024-09-27 06:51:29.012366 I | cephclient: generated admin config in /var/lib/rook/rook-ceph
+2024-09-27 06:51:29.013463 D | cephclient: config file @ /etc/ceph/ceph.conf:
+[global]
+fsid                = e6651f21-10a6-4c6a-9478-fa636f6fb734
+mon initial members = a b c
+mon host            = [v2:10.111.198.109:3300,v1:10.111.198.109:6789],[v2:10.104.7.90:3300,v1:10.104.7.90:6789],[v2:10.110.49.231:3300,v1:10.110.49.231:6789]
+
+[client.admin]
+keyring = /var/lib/rook/rook-ceph/client.admin.keyring
+2024-09-27 06:51:29.013919 I | cephcmd: destroying osd.2 and cleaning its backing device
+2024-09-27 06:51:29.014564 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list  --format json
+2024-09-27 06:51:30.119461 D | cephosd: {}
+2024-09-27 06:51:30.119563 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2024-09-27 06:51:30.119622 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list --format json
+2024-09-27 06:51:33.095434 D | cephosd: {
+    "1231782c-5557-4a19-ae85-53c8c64cd0ae": {
+        "ceph_fsid": "e6651f21-10a6-4c6a-9478-fa636f6fb734",
+        "device": "/dev/mapper/set1-data-1nzvch-block-dmcrypt",
+        "osd_id": 2,
+        "osd_uuid": "1231782c-5557-4a19-ae85-53c8c64cd0ae",
+        "type": "bluestore"
+    }
+}
+2024-09-27 06:51:33.096407 I | cephosd: 1 ceph-volume raw osd devices configured on this node
+2024-09-27 06:51:33.096428 I | cephosd: destroying osd.2
+2024-09-27 06:51:33.097200 D | exec: Running command: ceph osd destroy osd.2 --yes-i-really-mean-it --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-09-27 06:51:33.971614 I | cephosd: successfully destroyed osd.2
+2024-09-27 06:51:33.971753 D | exec: Running command: dmsetup remove --force set1-data-1nzvch-block-dmcrypt
+2024-09-27 06:51:34.006678 D | cephosd: successfully removed stale dm device "set1-data-1nzvch-block-dmcrypt"
+2024-09-27 06:51:34.007200 D | exec: Running command: lsblk /mnt/set1-data-1nzvch --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-09-27 06:51:34.042235 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"crypto_LUKS\""
+2024-09-27 06:51:34.042562 D | exec: Running command: sgdisk --print /mnt/set1-data-1nzvch
+2024-09-27 06:51:34.070422 W | inventory: uuid not found for device /mnt/set1-data-1nzvch. output=Creating new GPT entries in memory.
+Disk /mnt/set1-data-1nzvch: 20971520 sectors, 10.0 GiB
+Sector size (logical/physical): 512/512 bytes
+Disk identifier (GUID): DDD0DC63-F5A1-408E-A793-EF15B0BA0480
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 20971486
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 20971453 sectors (10.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+2024-09-27 06:51:34.070524 I | cephosd: zap OSD.2 path "/dev/vdc"
+2024-09-27 06:51:34.070543 D | exec: Running command: stdbuf -oL ceph-volume lvm zap /dev/vdc --destroy
+2024-09-27 06:51:36.321894 I | cephosd: --> Zapping: /dev/vdc
+Running command: /usr/bin/dd if=/dev/zero of=/dev/vdc bs=1M count=10 conv=fsync
+--> Zapping successful for: <Raw Device: /dev/vdc>
+2024-09-27 06:51:36.322063 I | cephosd: successfully zapped osd.2 path "/dev/vdc"
+2024-09-27 06:51:36.322102 D | exec: Running command: dmsetup version
+2024-09-27 06:51:36.334110 I | cephosd: Library version:   1.02.197 (2023-11-21)
+Driver version:    4.43.0
+2024-09-27 06:51:36.358798 I | cephosd: discovering hardware
+2024-09-27 06:51:36.359091 D | exec: Running command: lsblk /mnt/set1-data-1nzvch --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-09-27 06:51:36.367808 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-09-27 06:51:36.368336 D | exec: Running command: sgdisk --print /mnt/set1-data-1nzvch
+2024-09-27 06:51:36.376530 W | inventory: uuid not found for device /mnt/set1-data-1nzvch. output=Creating new GPT entries in memory.
+Disk /mnt/set1-data-1nzvch: 20971520 sectors, 10.0 GiB
+Sector size (logical/physical): 512/512 bytes
+Disk identifier (GUID): 083A3854-4F09-4E9A-80B0-97CFFEFFAD39
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 20971486
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 20971453 sectors (10.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+2024-09-27 06:51:36.376617 D | exec: Running command: udevadm info --query=property /dev/vdc
+2024-09-27 06:51:36.400362 D | sys: udevadm info output: "DEVPATH=/devices/pci0000:00/0000:00:07.0/virtio4/block/vdc\nDEVNAME=/dev/vdc\nDEVTYPE=disk\nMAJOR=253\nMINOR=32\nSUBSYSTEM=block\nUSEC_INITIALIZED=18208726\nID_PATH=pci-0000:00:07.0\nID_PATH_TAG=pci-0000_00_07_0\nDEVLINKS=/dev/disk/by-path/virtio-pci-0000:00:07.0 /dev/disk/by-path/pci-0000:00:07.0\nTAGS=:systemd:\nCURRENT_TAGS=:systemd:"
+2024-09-27 06:51:36.400412 I | cephosd: creating and starting the osds
+2024-09-27 06:51:36.400579 D | cephosd: desiredDevices are [{Name:/mnt/set1-data-1nzvch OSDsPerDevice:1 MetadataDevice: DatabaseSizeMB:0 DeviceClass: InitialWeight: IsFilter:false IsDevicePathFilter:false}]
+2024-09-27 06:51:36.400593 D | cephosd: context.Devices are:
+2024-09-27 06:51:36.400678 D | cephosd: &{Name:/mnt/set1-data-1nzvch Parent: HasChildren:false DevLinks:/dev/disk/by-path/virtio-pci-0000:00:07.0 /dev/disk/by-path/pci-0000:00:07.0 Size:10737418240 UUID: Serial: Type:data Rotational:true Readonly:false Partitions:[] Filesystem: Mountpoint: Vendor: Model: WWN: WWNVendorExtension: Empty:false CephVolumeData: RealPath:/dev/vdc KernelName:vdc Encrypted:false}
+2024-09-27 06:51:36.400707 I | cephosd: old lsblk can't detect bluestore signature, so try to detect here
+2024-09-27 06:51:36.400910 D | exec: Running command: cryptsetup luksDump /mnt/set1-data-1nzvch
+2024-09-27 06:51:36.425562 E | cephosd: failed to determine if the encrypted block "/mnt/set1-data-1nzvch" is from our cluster. failed to dump LUKS header for disk "/mnt/set1-data-1nzvch". Device /mnt/set1-data-1nzvch is not a valid LUKS device.: exit status 1
+2024-09-27 06:51:36.426154 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list /mnt/set1-data-1nzvch --format json
+2024-09-27 06:51:37.310023 D | cephosd: {}
+2024-09-27 06:51:37.310373 I | cephosd: 0 ceph-volume raw osd devices configured on this node
+2024-09-27 06:51:37.310464 I | cephosd: device "/mnt/set1-data-1nzvch" is available.
+2024-09-27 06:51:37.310510 I | cephosd: "/mnt/set1-data-1nzvch" found in the desired devices
+2024-09-27 06:51:37.310569 I | cephosd: device "/mnt/set1-data-1nzvch" is selected by the device filter/name "/mnt/set1-data-1nzvch"
+2024-09-27 06:51:37.422327 I | cephosd: configuring osd devices: {"Entries":{"data":{"Data":-1,"Metadata":null,"Config":{"Name":"/mnt/set1-data-1nzvch","OSDsPerDevice":1,"MetadataDevice":"","DatabaseSizeMB":0,"DeviceClass":"hdd","InitialWeight":"","IsFilter":false,"IsDevicePathFilter":false},"PersistentDevicePaths":["/dev/disk/by-path/virtio-pci-0000:00:07.0","/dev/disk/by-path/pci-0000:00:07.0"],"DeviceInfo":{"name":"/mnt/set1-data-1nzvch","parent":"","hasChildren":false,"devLinks":"/dev/disk/by-path/virtio-pci-0000:00:07.0 /dev/disk/by-path/pci-0000:00:07.0","size":10737418240,"uuid":"","serial":"","type":"data","rotational":true,"readOnly":false,"Partitions":null,"filesystem":"","mountpoint":"","vendor":"","model":"","wwn":"","wwnVendorExtension":"","empty":false,"real-path":"/dev/vdc","kernel-name":"vdc"},"RestoreOSD":false}}}
+2024-09-27 06:51:37.427587 I | cephclient: getting or creating ceph auth key "client.bootstrap-osd"
+2024-09-27 06:51:37.429027 D | exec: Running command: ceph auth get-or-create-key client.bootstrap-osd mon allow profile bootstrap-osd --connect-timeout=15 --cluster=rook-ceph --conf=/var/lib/rook/rook-ceph/rook-ceph.config --name=client.admin --keyring=/var/lib/rook/rook-ceph/client.admin.keyring --format json
+2024-09-27 06:51:38.222829 D | exec: Running command: lsblk /mnt/set1-data-1nzvch --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-09-27 06:51:38.233401 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-09-27 06:51:38.233790 I | cephosd: configuring new device "/mnt/set1-data-1nzvch"
+2024-09-27 06:51:38.234402 D | exec: Running command: stdbuf -oL ceph-volume --log-path /var/log/ceph/set1-data-1nzvch raw prepare --bluestore --data /mnt/set1-data-1nzvch --osd-id 2
+2024-09-27 06:51:47.973913 I | cephosd: stderr: Unknown device "/mnt/set1-data-1nzvch": No such device
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring osd tree -f json
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring -i - osd new 096cd226-7cb9-4564-bf97-b759db84a3ea 2
+Running command: /usr/bin/ceph-authtool --gen-print-key
+Running command: /usr/bin/mount -t tmpfs tmpfs /var/lib/ceph/osd/ceph-2
+Running command: /usr/bin/chown -R ceph:ceph /mnt/set1-data-1nzvch
+Running command: /usr/bin/ln -s /mnt/set1-data-1nzvch /var/lib/ceph/osd/ceph-2/block
+Running command: /usr/bin/ceph --cluster ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring mon getmap -o /var/lib/ceph/osd/ceph-2/activate.monmap
+ stderr: got monmap epoch 3
+--> Creating keyring file for osd.2
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-2/keyring
+Running command: /usr/bin/chown -R ceph:ceph /var/lib/ceph/osd/ceph-2/
+Running command: /usr/bin/ceph-osd --cluster ceph --osd-objectstore bluestore --mkfs -i 2 --monmap /var/lib/ceph/osd/ceph-2/activate.monmap --keyfile - --osd-data /var/lib/ceph/osd/ceph-2/ --osd-uuid 096cd226-7cb9-4564-bf97-b759db84a3ea --setuser ceph --setgroup ceph
+ stderr: 2024-09-27T06:51:43.824+0000 7fcbf0f90640 -1 bluestore(/var/lib/ceph/osd/ceph-2//block) _read_bdev_label unable to decode label at offset 102: void bluestore_bdev_label_t::decode(ceph::buffer::v15_2_0::list::const_iterator&) decode past end of struct encoding: Malformed input [buffer:3]
+ stderr: 2024-09-27T06:51:43.824+0000 7fcbf0f90640 -1 bluestore(/var/lib/ceph/osd/ceph-2//block) _read_bdev_label unable to decode label at offset 102: void bluestore_bdev_label_t::decode(ceph::buffer::v15_2_0::list::const_iterator&) decode past end of struct encoding: Malformed input [buffer:3]
+ stderr: 2024-09-27T06:51:43.825+0000 7fcbf0f90640 -1 bluestore(/var/lib/ceph/osd/ceph-2//block) _read_bdev_label unable to decode label at offset 102: void bluestore_bdev_label_t::decode(ceph::buffer::v15_2_0::list::const_iterator&) decode past end of struct encoding: Malformed input [buffer:3]
+ stderr: 2024-09-27T06:51:43.827+0000 7fcbf0f90640 -1 bluestore(/var/lib/ceph/osd/ceph-2/) _read_fsid unparsable uuid
+--> ceph-volume raw clear prepare successful for: /mnt/set1-data-1nzvch
+2024-09-27 06:51:47.976415 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log lvm list /mnt/set1-data-1nzvch --format json
+2024-09-27 06:51:49.122520 D | cephosd: {}
+2024-09-27 06:51:49.123232 I | cephosd: 0 ceph-volume lvm osd devices configured on this node
+2024-09-27 06:51:49.123391 D | exec: Running command: cryptsetup luksDump /mnt/set1-data-1nzvch
+2024-09-27 06:51:49.150426 E | cephosd: failed to determine if the encrypted block "/mnt/set1-data-1nzvch" is from our cluster. failed to dump LUKS header for disk "/mnt/set1-data-1nzvch". Device /mnt/set1-data-1nzvch is not a valid LUKS device.: exit status 1
+2024-09-27 06:51:49.150500 D | exec: Running command: stdbuf -oL ceph-volume --log-path /tmp/ceph-log raw list /mnt/set1-data-1nzvch --format json
+2024-09-27 06:51:49.937310 D | cephosd: {
+    "096cd226-7cb9-4564-bf97-b759db84a3ea": {
+        "ceph_fsid": "e6651f21-10a6-4c6a-9478-fa636f6fb734",
+        "device": "/dev/vdc",
+        "osd_id": 2,
+        "osd_uuid": "096cd226-7cb9-4564-bf97-b759db84a3ea",
+        "type": "bluestore"
+    }
+}
+2024-09-27 06:51:49.938827 D | exec: Running command: lsblk /mnt/set1-data-1nzvch --bytes --nodeps --pairs --paths --output SIZE,ROTA,RO,TYPE,PKNAME,NAME,KNAME,MOUNTPOINT,FSTYPE
+2024-09-27 06:51:49.948257 D | sys: lsblk output: "SIZE=\"10737418240\" ROTA=\"1\" RO=\"0\" TYPE=\"disk\" PKNAME=\"\" NAME=\"/dev/vdc\" KNAME=\"/dev/vdc\" MOUNTPOINT=\"\" FSTYPE=\"\""
+2024-09-27 06:51:49.948460 D | exec: Running command: sgdisk --print /mnt/set1-data-1nzvch
+2024-09-27 06:51:49.962027 W | inventory: uuid not found for device /mnt/set1-data-1nzvch. output=Creating new GPT entries in memory.
+Disk /mnt/set1-data-1nzvch: 20971520 sectors, 10.0 GiB
+Sector size (logical/physical): 512/512 bytes
+Disk identifier (GUID): 5A8F8819-FEFE-410F-B4E7-9F65FD08C700
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 20971486
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 20971453 sectors (10.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+2024-09-27 06:51:49.962364 I | cephosd: setting device class "hdd" for device "/mnt/set1-data-1nzvch"
+2024-09-27 06:51:49.962490 I | cephosd: 1 ceph-volume raw osd devices configured on this node
+2024-09-27 06:51:49.963771 I | cephosd: devices = [{ID:2 Cluster:ceph UUID:096cd226-7cb9-4564-bf97-b759db84a3ea DevicePartUUID: DeviceClass:hdd BlockPath:/mnt/set1-data-1nzvch MetadataPath: WalPath: SkipLVRelease:true Location:root=default host=minikube-m02 LVBackedPV:false CVMode:raw Store:bluestore TopologyAffinity: Encrypted:false ExportService:false NodeName: PVCName:}]
