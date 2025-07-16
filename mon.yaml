@@ -1,0 +1,459 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-09-23T06:40:14Z"
+  generateName: rook-ceph-mon-b-54759fc7b8-
+  labels:
+    app: rook-ceph-mon
+    app.kubernetes.io/component: cephclusters.ceph.rook.io
+    app.kubernetes.io/created-by: rook-ceph-operator
+    app.kubernetes.io/instance: b
+    app.kubernetes.io/managed-by: rook-ceph-operator
+    app.kubernetes.io/name: ceph-mon
+    app.kubernetes.io/part-of: rook-ceph
+    ceph_daemon_id: b
+    ceph_daemon_type: mon
+    mgr_role: standby
+    mon: b
+    mon_cluster: rook-ceph
+    pod-template-hash: 54759fc7b8
+    pvc_name: rook-ceph-mon-b
+    pvc_size: 10Gi
+    rook.io/operator-namespace: rook-ceph
+    rook_cluster: rook-ceph
+  name: rook-ceph-mon-b-54759fc7b8-fktdr
+  namespace: rook-ceph
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: rook-ceph-mon-b-54759fc7b8
+    uid: 8fcf6c56-a073-4e3b-a88d-837110b67b72
+  resourceVersion: "2331"
+  uid: 94bc73ae-99d0-46fa-97d6-978bc50d7dd7
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: rook-ceph-mon
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - args:
+    - --fsid=2c01b84a-016f-4213-be31-d8eaf1b767f7
+    - --keyring=/etc/ceph/keyring-store/keyring
+    - --default-log-to-stderr=true
+    - --default-err-to-stderr=true
+    - --default-mon-cluster-log-to-stderr=true
+    - '--default-log-stderr-prefix=debug '
+    - --default-log-to-file=false
+    - --default-mon-cluster-log-to-file=false
+    - --mon-host=$(ROOK_CEPH_MON_HOST)
+    - --mon-initial-members=$(ROOK_CEPH_MON_INITIAL_MEMBERS)
+    - --id=b
+    - --setuser=ceph
+    - --setgroup=ceph
+    - --foreground
+    - --public-addr=10.108.28.230
+    - --setuser-match-path=/var/lib/ceph/mon/ceph-b/store.db
+    - --public-bind-addr=$(ROOK_POD_IP)
+    command:
+    - ceph-mon
+    env:
+    - name: CONTAINER_IMAGE
+      value: quay.io/ceph/ceph:v18.2.4
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    - name: POD_MEMORY_LIMIT
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: limits.memory
+    - name: POD_MEMORY_REQUEST
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: requests.memory
+    - name: POD_CPU_LIMIT
+      valueFrom:
+        resourceFieldRef:
+          divisor: "1"
+          resource: limits.cpu
+    - name: POD_CPU_REQUEST
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: requests.cpu
+    - name: CEPH_USE_RANDOM_NONCE
+      value: "true"
+    - name: ROOK_CEPH_MON_HOST
+      valueFrom:
+        secretKeyRef:
+          key: mon_host
+          name: rook-ceph-config
+    - name: ROOK_CEPH_MON_INITIAL_MEMBERS
+      valueFrom:
+        secretKeyRef:
+          key: mon_initial_members
+          name: rook-ceph-config
+    - name: ROOK_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
+    image: quay.io/ceph/ceph:v18.2.4
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      exec:
+        command:
+        - env
+        - -i
+        - sh
+        - -c
+        - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-mon.b.asok mon_status 2>&1)\"\nrc=$?\nif
+          [ $rc -ne 0 ]; then\n\techo \"ceph daemon health check failed with the following
+          output:\"\n\techo \"$outp\" | sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: mon
+    ports:
+    - containerPort: 3300
+      name: tcp-msgr2
+      protocol: TCP
+    - containerPort: 6789
+      name: tcp-msgr1
+      protocol: TCP
+    resources: {}
+    securityContext:
+      privileged: false
+    startupProbe:
+      exec:
+        command:
+        - env
+        - -i
+        - sh
+        - -c
+        - "\noutp=\"$(ceph --admin-daemon /run/ceph/ceph-mon.b.asok mon_status 2>&1)\"\nrc=$?\nif
+          [ $rc -ne 0 ]; then\n\techo \"ceph daemon health check failed with the following
+          output:\"\n\techo \"$outp\" | sed -e 's/^/> /g'\n\texit $rc\nfi\n"
+      failureThreshold: 6
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/ceph
+      name: rook-config-override
+      readOnly: true
+    - mountPath: /run/ceph
+      name: ceph-daemons-sock-dir
+    - mountPath: /etc/ceph/keyring-store/
+      name: rook-ceph-mons-keyring
+      readOnly: true
+    - mountPath: /var/log/ceph
+      name: rook-ceph-log
+    - mountPath: /var/lib/ceph/crash
+      name: rook-ceph-crash
+    - mountPath: /var/lib/ceph/mon/ceph-b
+      name: ceph-daemon-data
+      subPath: data
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fw8c8
+      readOnly: true
+    workingDir: /var/log/ceph
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  initContainers:
+  - args:
+    - --verbose
+    - --recursive
+    - ceph:ceph
+    - /var/log/ceph
+    - /var/lib/ceph/crash
+    - /run/ceph
+    - /var/lib/ceph/mon/ceph-b
+    command:
+    - chown
+    image: quay.io/ceph/ceph:v18.2.4
+    imagePullPolicy: IfNotPresent
+    name: chown-container-data-dir
+    resources: {}
+    securityContext:
+      privileged: false
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/ceph
+      name: rook-config-override
+      readOnly: true
+    - mountPath: /run/ceph
+      name: ceph-daemons-sock-dir
+    - mountPath: /etc/ceph/keyring-store/
+      name: rook-ceph-mons-keyring
+      readOnly: true
+    - mountPath: /var/log/ceph
+      name: rook-ceph-log
+    - mountPath: /var/lib/ceph/crash
+      name: rook-ceph-crash
+    - mountPath: /var/lib/ceph/mon/ceph-b
+      name: ceph-daemon-data
+      subPath: data
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fw8c8
+      readOnly: true
+  - args:
+    - --fsid=2c01b84a-016f-4213-be31-d8eaf1b767f7
+    - --keyring=/etc/ceph/keyring-store/keyring
+    - --default-log-to-stderr=true
+    - --default-err-to-stderr=true
+    - --default-mon-cluster-log-to-stderr=true
+    - '--default-log-stderr-prefix=debug '
+    - --default-log-to-file=false
+    - --default-mon-cluster-log-to-file=false
+    - --mon-host=$(ROOK_CEPH_MON_HOST)
+    - --mon-initial-members=$(ROOK_CEPH_MON_INITIAL_MEMBERS)
+    - --id=b
+    - --setuser=ceph
+    - --setgroup=ceph
+    - --public-addr=10.108.28.230
+    - --mkfs
+    command:
+    - ceph-mon
+    env:
+    - name: CONTAINER_IMAGE
+      value: quay.io/ceph/ceph:v18.2.4
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    - name: POD_MEMORY_LIMIT
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: limits.memory
+    - name: POD_MEMORY_REQUEST
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: requests.memory
+    - name: POD_CPU_LIMIT
+      valueFrom:
+        resourceFieldRef:
+          divisor: "1"
+          resource: limits.cpu
+    - name: POD_CPU_REQUEST
+      valueFrom:
+        resourceFieldRef:
+          divisor: "0"
+          resource: requests.cpu
+    - name: CEPH_USE_RANDOM_NONCE
+      value: "true"
+    - name: ROOK_CEPH_MON_HOST
+      valueFrom:
+        secretKeyRef:
+          key: mon_host
+          name: rook-ceph-config
+    - name: ROOK_CEPH_MON_INITIAL_MEMBERS
+      valueFrom:
+        secretKeyRef:
+          key: mon_initial_members
+          name: rook-ceph-config
+    image: quay.io/ceph/ceph:v18.2.4
+    imagePullPolicy: IfNotPresent
+    name: init-mon-fs
+    resources: {}
+    securityContext:
+      privileged: false
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/ceph
+      name: rook-config-override
+      readOnly: true
+    - mountPath: /run/ceph
+      name: ceph-daemons-sock-dir
+    - mountPath: /etc/ceph/keyring-store/
+      name: rook-ceph-mons-keyring
+      readOnly: true
+    - mountPath: /var/log/ceph
+      name: rook-ceph-log
+    - mountPath: /var/lib/ceph/crash
+      name: rook-ceph-crash
+    - mountPath: /var/lib/ceph/mon/ceph-b
+      name: ceph-daemon-data
+      subPath: data
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-fw8c8
+      readOnly: true
+  nodeName: minikube-m02
+  preemptionPolicy: PreemptLowerPriority
+  priority: 2000001000
+  priorityClassName: system-node-critical
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: rook-ceph-default
+  serviceAccountName: rook-ceph-default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 5
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: rook-config-override
+    projected:
+      defaultMode: 420
+      sources:
+      - configMap:
+          items:
+          - key: config
+            mode: 292
+            path: ceph.conf
+          name: rook-config-override
+  - name: rook-ceph-mons-keyring
+    secret:
+      defaultMode: 420
+      secretName: rook-ceph-mons-keyring
+  - hostPath:
+      path: /var/lib/rook/exporter
+      type: DirectoryOrCreate
+    name: ceph-daemons-sock-dir
+  - hostPath:
+      path: /var/lib/rook/rook-ceph/log
+      type: ""
+    name: rook-ceph-log
+  - hostPath:
+      path: /var/lib/rook/rook-ceph/crash
+      type: ""
+    name: rook-ceph-crash
+  - name: ceph-daemon-data
+    persistentVolumeClaim:
+      claimName: rook-ceph-mon-b
+  - name: kube-api-access-fw8c8
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-09-23T06:40:22Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-09-23T06:40:24Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-09-23T06:40:37Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-09-23T06:40:37Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-09-23T06:40:14Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://b0a5de1e46ce00b1a275aed1dcdb0efa3bb12d39eb5e4d3f1c3ff4e834b83868
+    image: quay.io/ceph/ceph:v18.2.4
+    imageID: docker-pullable://quay.io/ceph/ceph@sha256:6ac7f923aa1d23b43248ce0ddec7e1388855ee3d00813b52c3172b0b23b37906
+    lastState: {}
+    name: mon
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2024-09-23T06:40:25Z"
+  hostIP: 192.168.39.120
+  hostIPs:
+  - ip: 192.168.39.120
+  initContainerStatuses:
+  - containerID: docker://36f93d13bbf7c997641539fafd456e67832f49eaefc997c35c8cf3a69a944be7
+    image: quay.io/ceph/ceph:v18.2.4
+    imageID: docker-pullable://quay.io/ceph/ceph@sha256:6ac7f923aa1d23b43248ce0ddec7e1388855ee3d00813b52c3172b0b23b37906
+    lastState: {}
+    name: chown-container-data-dir
+    ready: true
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: docker://36f93d13bbf7c997641539fafd456e67832f49eaefc997c35c8cf3a69a944be7
+        exitCode: 0
+        finishedAt: "2024-09-23T06:40:21Z"
+        reason: Completed
+        startedAt: "2024-09-23T06:40:21Z"
+  - containerID: docker://b22be9e6dec88b48b4bba5e3cb61d5ea7cfe56ab5bb02a871f7e9c07dbc63bbb
+    image: quay.io/ceph/ceph:v18.2.4
+    imageID: docker-pullable://quay.io/ceph/ceph@sha256:6ac7f923aa1d23b43248ce0ddec7e1388855ee3d00813b52c3172b0b23b37906
+    lastState: {}
+    name: init-mon-fs
+    ready: true
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: docker://b22be9e6dec88b48b4bba5e3cb61d5ea7cfe56ab5bb02a871f7e9c07dbc63bbb
+        exitCode: 0
+        finishedAt: "2024-09-23T06:40:24Z"
+        reason: Completed
+        startedAt: "2024-09-23T06:40:23Z"
+  phase: Running
+  podIP: 10.244.1.9
+  podIPs:
+  - ip: 10.244.1.9
+  qosClass: BestEffort
+  startTime: "2024-09-23T06:40:14Z"

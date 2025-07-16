@@ -3,9 +3,17 @@
 PRIMARY_CLUSTER="${PRIMARY_CLUSTER:-minicluster1}"
 SECONDARY_CLUSTER="${SECONDARY_CLUSTER:-minicluster2}"
 
+echo "here"
+echo $PRIMARY_CLUSTER
+echo $SECONDARY_CLUSTER
+
 SECONDARY_CLUSTER_PEER_TOKEN_SECRET_NAME=$(kubectl get cephblockpools.ceph.rook.io mirrored-pool --context="${SECONDARY_CLUSTER}" -nrook-ceph -o jsonpath='{.status.info.rbdMirrorBootstrapPeerSecretName}')
 SECONDARY_CLUSTER_SECRET=$(kubectl get secret -n rook-ceph "${SECONDARY_CLUSTER_PEER_TOKEN_SECRET_NAME}" --context=${SECONDARY_CLUSTER} -o jsonpath='{.data.token}'| base64 -d)
 SECONDARY_CLUSTER_SITE_NAME=$(kubectl get cephblockpools.ceph.rook.io mirrored-pool --context=${SECONDARY_CLUSTER} -nrook-ceph -o jsonpath='{.status.mirroringInfo.site_name}')
+
+echo SECONDARY_CLUSTER_PEER_TOKEN_SECRET_NAME is $SECONDARY_CLUSTER_PEER_TOKEN_SECRET_NAME
+echo Token for the secondary cluster is $SECONDARY_CLUSTER_SECRET
+echo SECONDARY_CLUSTER_SITE_NAME is ${SECONDARY_CLUSTER_SITE_NAME}
 
 
 kubectl -n rook-ceph create secret generic --context="${PRIMARY_CLUSTER}" "${SECONDARY_CLUSTER_SITE_NAME}" \

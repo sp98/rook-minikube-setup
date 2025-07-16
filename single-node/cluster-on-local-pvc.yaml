@@ -22,12 +22,13 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   # PV for mon must be a filesystem volume.
-  volumeMode: Filesystem
+  # volumeMode: Filesystem
+  volumeMode: Block
   local:
     # If you want to use dm devices like logical volume, please replace `/dev/sdb` with their device names like `/dev/vg-name/lv-name`.
     path: /dev/vdg
@@ -48,7 +49,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -73,11 +74,12 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  volumeMode: Filesystem
+  # volumeMode: Filesystem
+  volumeMode: Block
   local:
     path: /dev/vdc
     #path: /dev/vg1/lv3
@@ -97,7 +99,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -121,11 +123,12 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  volumeMode: Filesystem
+  # volumeMode: Filesystem
+  volumeMode: Block
   local:
     path: /dev/vde
     # path: /dev/vg1/lv5
@@ -145,7 +148,7 @@ metadata:
 spec:
   storageClassName: local-storage
   capacity:
-    storage: 256Mi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -193,15 +196,14 @@ spec:
   mon:
     count: 3
     allowMultiplePerNode: true
-    volumeClaimTemplate:
-      spec:
-        storageClassName: local-storage
-        resources:
-          requests:
-            storage: 256Mi
+    # volumeClaimTemplate:
+    #   spec:
+    #     storageClassName: local-storage
+    #     resources:
+    #       requests:
+    #         storage: 10Gi
   cephVersion:
-    image: quay.io/guits/ceph-volume:bs-rdr
-    # image: quay.io/ceph/ceph:v18.2.1
+    image: quay.io/ceph/ceph:v19.2.2
     # image: quay.io/ceph/daemon-base:latest-devel
     # image: quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy
     allowUnsupported: true
@@ -212,9 +214,12 @@ spec:
     modules:
       - name: pg_autoscaler
         enabled: true
+      - name: prometheus
+        enabled: true
   dashboard:
-    enabled: true
-    ssl: true
+    enabled: false
+  # monitoring:
+  #   enabled: true
   crashCollector:
     disable: false
   storage:
@@ -222,7 +227,7 @@ spec:
       type: bluestore
     storageClassDeviceSets:
       - name: set1
-        count: 3
+        count: 2
         portable: false
         tuneDeviceClass: true
         tuneFastDeviceClass: false
@@ -272,7 +277,121 @@ spec:
             spec:
               resources:
                 requests:
-                  storage: 256Mi
+                  storage: 10Gi
+              # IMPORTANT: Change the storage class depending on your environment
+              storageClassName: local-storage
+              volumeMode: Block
+              accessModes:
+                - ReadWriteOnce
+      - name: set2
+        count: 2
+        portable: false
+        tuneDeviceClass: true
+        tuneFastDeviceClass: false
+        encrypted: true
+        # placement:
+        #   topologySpreadConstraints:
+        #     - maxSkew: 1
+        #       topologyKey: kubernetes.io/hostname
+        #       whenUnsatisfiable: ScheduleAnyway
+        #       labelSelector:
+        #         matchExpressions:
+        #           - key: app
+        #             operator: In
+        #             values:
+        #               - rook-ceph-osd
+        #               - rook-ceph-osd-prepare
+        # preparePlacement:
+        #   podAntiAffinity:
+        #     preferredDuringSchedulingIgnoredDuringExecution:
+        #       - weight: 100
+        #         podAffinityTerm:
+        #           labelSelector:
+        #             matchExpressions:
+        #               - key: app
+        #                 operator: In
+        #                 values:
+        #                   - rook-ceph-osd
+        #               - key: app
+        #                 operator: In
+        #                 values:
+        #                   - rook-ceph-osd-prepare
+        #           topologyKey: kubernetes.io/hostname
+        resources:
+        # These are the OSD daemon limits. For OSD prepare limits, see the separate section below for "prepareosd" resources
+        #   limits:
+        #     cpu: "500m"
+        #     memory: "4Gi"
+        #   requests:
+        #     cpu: "500m"
+        #     memory: "4Gi"
+        volumeClaimTemplates:
+          - metadata:
+              name: data
+              # if you are looking at giving your OSD a different CRUSH device class than the one detected by Ceph
+              # annotations:
+              #   crushDeviceClass: hybrid
+            spec:
+              resources:
+                requests:
+                  storage: 10Gi
+              # IMPORTANT: Change the storage class depending on your environment
+              storageClassName: local-storage
+              volumeMode: Block
+              accessModes:
+                - ReadWriteOnce
+      - name: set3
+        count: 2
+        portable: false
+        tuneDeviceClass: true
+        tuneFastDeviceClass: false
+        encrypted: true
+        # placement:
+        #   topologySpreadConstraints:
+        #     - maxSkew: 1
+        #       topologyKey: kubernetes.io/hostname
+        #       whenUnsatisfiable: ScheduleAnyway
+        #       labelSelector:
+        #         matchExpressions:
+        #           - key: app
+        #             operator: In
+        #             values:
+        #               - rook-ceph-osd
+        #               - rook-ceph-osd-prepare
+        # preparePlacement:
+        #   podAntiAffinity:
+        #     preferredDuringSchedulingIgnoredDuringExecution:
+        #       - weight: 100
+        #         podAffinityTerm:
+        #           labelSelector:
+        #             matchExpressions:
+        #               - key: app
+        #                 operator: In
+        #                 values:
+        #                   - rook-ceph-osd
+        #               - key: app
+        #                 operator: In
+        #                 values:
+        #                   - rook-ceph-osd-prepare
+        #           topologyKey: kubernetes.io/hostname
+        resources:
+        # These are the OSD daemon limits. For OSD prepare limits, see the separate section below for "prepareosd" resources
+        #   limits:
+        #     cpu: "500m"
+        #     memory: "4Gi"
+        #   requests:
+        #     cpu: "500m"
+        #     memory: "4Gi"
+        volumeClaimTemplates:
+          - metadata:
+              name: data
+              # if you are looking at giving your OSD a different CRUSH device class than the one detected by Ceph
+              # annotations:
+              #   crushDeviceClass: hybrid
+            spec:
+              resources:
+                requests:
+                  storage: 10Gi
               # IMPORTANT: Change the storage class depending on your environment
               storageClassName: local-storage
               volumeMode: Block
@@ -295,7 +414,13 @@ spec:
   disruptionManagement:
     managePodBudgets: true
     osdMaintenanceTimeout: 30
-    pgHealthCheckTimeout: 0
+  cleanupPolicy:
+    confirmation: ""
+    # sanitizeDisks:
+    #   method: quick
+    #   dataSource: zero
+    #   iteration: 1
+    wipeDevicesFromOtherClusters: true
 
 ---
 # apiVersion: v1
@@ -314,5 +439,5 @@ metadata:
 spec:
   name: .mgr
   replicated:
-    size: 1
+    size: 3
     requireSafeReplicaSize: false

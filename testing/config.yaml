@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodes-env
+  namespace: default
+data:
+  minikube_host: minikube
+  minikube_zone: zone-a
+  minikube_rack: rack-a
+  minikube-02_host: minikube-02
+  minikube-02_zone: zone-b
+  minikube-02_rack: rack-b
+  minikube-03_host: minikube-03
+  minikube-03_zone: zone-c
+  minikube-03_rack: rack-c

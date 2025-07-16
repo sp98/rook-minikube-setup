@@ -1,0 +1,21 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: rgw-scale
+  namespace: rook-ceph
+spec:
+  scaleTargetRef:
+    apiVersion: ceph.rook.io/v1
+    kind: CephObjectStore
+    name: my-store # deployment for the autoscaling
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: prometheus
+      metadata:
+        # serverAddress: http://rook-prometheus.rook-ceph.svc:9090
+        serverAddress: http://rook-ceph-exporter.rook-ceph.svc:9926
+        metricName: collecting_ceph_rgw_req
+        query: |
+          sum(rate(ceph_rgw_req[2m])) # prometheus query used for autoscaling
+        threshold: "10"

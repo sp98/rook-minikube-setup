@@ -3,24 +3,25 @@
 echo "*** Installing Rook on Devices on a local Minikube environment ***"
 
 echo "**** deleting existing images ****"
-docker image rm -f build-8df2d0f4/ceph-amd64:latest
+docker image rm -f build-b11aa2f7/ceph-amd64:latest
 docker image rm -f quay.io/sp1098/rook:local
 
 #CephImage="quay.io/ceph/ceph:v17.2.6"
-# CephImage="quay.io/ceph/ceph:v18.2.2"
+CephImage="quay.io/ceph/ceph:v19.2.2" 
+# CephImage="quay.io/guits/ceph-volume:bs-rdr"
 # CephImage="quay.ceph.io/ceph-ci/ceph:wip-athakkar-testing-2023-12-08-1309"
 # cephImage="quay.io/guits/ceph-volume:bs-rdr"
-cephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-bs-compression-recompression-test"
+#cephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-bs-compression-recompression-test"
 # CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
 # CephImage="quay.io/guits/ceph-volume:bs-rdr"
 # CephImage="quay.ceph.io/ceph-ci/ceph:wip-aclamk-os-bluestore-rdr-quincy"
-DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.11.0"
-DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0"
-DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v4.0.0"
-DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.5.0"
-DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v7.0.1"
-DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.10.0"
-DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.8.0"
+DefaultCSIPluginImage="quay.io/cephcsi/cephcsi:v3.14.0"
+DefaultRegistrarImage="registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.13.0"
+DefaultProvisionerImage="registry.k8s.io/sig-storage/csi-provisioner:v5.1.0"
+DefaultAttacherImage="registry.k8s.io/sig-storage/csi-attacher:v4.8.0"
+DefaultSnapshotterImage="registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0"
+DefaultResizerImage="registry.k8s.io/sig-storage/csi-resizer:v1.13.1"
+DefaultVolumeReplicationImage="quay.io/csiaddons/k8s-sidecar:v0.12.0"
 
 function pull_dependent_images(){
     if [[ "$(docker images -q ${DefaultCSIPluginImage} 2> /dev/null)" == "" ]]; then
@@ -63,7 +64,9 @@ echo "**** Build new rook image ****"
 cd ~/go/src/github.com/rook/rook
 for i in {1..5}; do make IMAGES="ceph" build && break || sleep 10; done
 
-docker tag build-8df2d0f4/ceph-amd64:latest quay.io/sp1098/rook:local
+docker tag build-b11aa2f7/ceph-amd64:latest quay.io/sp1098/rook:local
+
+# docker image push  quay.io/sp1098/rook:local
 
 function copy_image_to_cluster(){
     local build_image=$1
@@ -126,10 +129,20 @@ copy_images_to_minikube
 echo "**** Apply common ****"
 kubectl create -f common.yaml
 
-
 echo "**** Apply crds ****"
 #kubectl create -f pre-k8s-1.16/crds.yaml
 kubectl create -f crds.yaml
+
+
+# install prometheus operator bundle
+
+# echo "**** Install Prometheus operator ****"
+# kubectl create -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.71.1/bundle.yaml
+# while [[ $(kubectl get pods -l  app.kubernetes.io/name=prometheus-operator -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for prometheus operator pod" && sleep 5; done
+# kubectl create -f ./monitoring/rbac.yaml
+# kubectl create -f ./monitoring/prometheus-service.yaml
+# kubectl create -f ./monitoring/prometheus.yaml
+
 
 echo "**** Starting Rook Operator ****"
 kubectl create -f operator.yaml
@@ -144,12 +157,12 @@ if [ "$1" == "OSD_ON_DEVICE" ]; then
 echo "**** Creating ceph Cluster with OSD on Devices ****"
 # cd /home/sapillai/scripts/rook-minikube-setup/single-node
 # kubectl create -f cluster_metadata.yaml  --validate=false
-kubectl create -f cluster.yaml  --validate=false
+kubectl create -f cluster-test.yaml  --validate=false
 fi
 
 if [ "$1" == "OSD_ON_PVC" ]; then
 echo "**** Creating ceph Cluster with OSD on PVC ****"
-cd /home/sapillai/scripts/rook-minikube-setup/single-node
+cd /home/sp/scripts/rook-minikube-setup/single-node
 kubectl create -f cluster-on-local-pvc.yaml
 # kubectl create -f cluster_kms_vault.yaml
 fi

@@ -1,0 +1,48 @@
+---
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: block-storage
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  storageClassName: rook-ceph-block
+  volumeMode: Block
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fio-test
+spec:
+  selector:
+    matchLabels:
+      app: fio-test
+  template:
+    metadata:
+      labels:
+        app: fio-test
+    spec:
+      containers:
+      - command:
+        - /usr/bin/fio
+        - --blocksize=4k
+        - --ioengine=libaio
+        - --filename=/dev/target
+        image: docker.io/ljishen/fio:latest
+        name: fio
+        volumeDevices:
+        - devicePath: /dev/target
+          name: block-storage
+      restartPolicy: Always
+      volumes:
+      - name: block-storage
+        persistentVolumeClaim:
+          claimName: block-storage
+
+---
